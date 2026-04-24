@@ -55,3 +55,9 @@ export function addReview(
 export function hasUserReviewed(resortId: string, userId: string): boolean {
   return readReviews().some((r) => r.resortId === resortId && r.userId === userId);
 }
+
+export function getUserReviews(userId: string): Review[] {
+  return readReviews()
+    .filter((r) => r.userId === userId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}

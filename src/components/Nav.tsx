@@ -34,9 +34,9 @@ export function Nav({ user }: NavProps) {
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
-          <a href="/#resorts" className="text-sm font-medium text-white/70 transition hover:text-white">
+          <Link href="/resorts" className="text-sm font-medium text-white/70 transition hover:text-white">
             Resorts
-          </a>
+          </Link>
           <a href="/#map" className="text-sm font-medium text-white/70 transition hover:text-white">
             Map
           </a>

@@ -3,9 +3,12 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/auth";
 import { fetchAllResortWeather, type Resort, type ResortWeather } from "@/lib/resorts";
+import { findUserById } from "@/lib/users";
+import { toggleLike } from "@/lib/actions/likes";
 import { Nav } from "@/components/Nav";
 import { Chatbot } from "@/components/Chatbot";
 import { ResortMapLoader } from "@/components/ResortMapLoader";
+import { MiniLikeButton } from "@/components/MiniLikeButton";
 import type { MapResort } from "@/components/ResortMap";
 
 type ResortWithWeather = Resort & { weather: ResortWeather | null };
@@ -25,7 +28,15 @@ function ConditionBadge({ condition }: { condition: string }) {
   );
 }
 
-function ResortCard({ resort }: { resort: ResortWithWeather }) {
+function ResortCard({
+  resort,
+  isLiked,
+  toggleAction,
+}: {
+  resort: ResortWithWeather;
+  isLiked: boolean;
+  toggleAction: (() => Promise<void>) | null;
+}) {
   const w = resort.weather;
   return (
     <Link href={`/resorts/${resort.id}`} className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -38,8 +49,12 @@ function ResortCard({ resort }: { resort: ResortWithWeather }) {
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
         <div className="absolute inset-0 bg-linear-to-t from-navy/70 to-transparent" />
+        {/* Like button */}
+        <div className="absolute left-3 top-3 z-10">
+          <MiniLikeButton toggleAction={toggleAction} initialLiked={isLiked} />
+        </div>
         {w && (
-          <div className="absolute top-3 right-3">
+          <div className="absolute right-3 top-3">
             <ConditionBadge condition={w.condition} />
           </div>
         )}
@@ -82,6 +97,8 @@ export default async function HomePage() {
   const user = token ? verifySessionToken(token) : null;
 
   const resorts = await fetchAllResortWeather();
+
+  const likedResortIds = user ? (findUserById(user.userId)?.likedResorts ?? []) : [];
 
   const ticker = resorts.map((r) => ({
     resort: r.name.split(" ")[0],
@@ -203,7 +220,12 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {resorts.map((resort) => (
-              <ResortCard key={resort.id} resort={resort} />
+              <ResortCard
+                key={resort.id}
+                resort={resort}
+                isLiked={likedResortIds.includes(resort.id)}
+                toggleAction={user ? toggleLike.bind(null, resort.id) : null}
+              />
             ))}
           </div>
         </div>

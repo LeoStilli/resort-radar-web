@@ -87,8 +87,8 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
         />
         <div className="absolute inset-0 bg-linear-to-b from-navy/40 via-navy/10 to-navy" />
 
-        {/* Breadcrumb */}
-        <div className="absolute left-6 top-6 z-10 md:left-10">
+        {/* Breadcrumb — pushed below the fixed nav (~64 px) */}
+        <div className="absolute left-6 top-20 z-10 md:left-10">
           <Link
             href="/resorts"
             className="flex items-center gap-2 rounded-full bg-navy/60 px-4 py-2 text-sm text-white/70 backdrop-blur-sm transition hover:text-white"

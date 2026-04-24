@@ -18,15 +18,23 @@ export async function updateProfile(
   if (!session) redirect("/login");
 
   const name = (formData.get("name") as string | null)?.trim() ?? "";
+  const bio = (formData.get("bio") as string | null)?.trim() ?? "";
+  const avatarUrl = (formData.get("avatarUrl") as string | null)?.trim() ?? "";
+  const coverUrl = (formData.get("coverUrl") as string | null)?.trim() ?? "";
   const skillLevel = (formData.get("skillLevel") as string | null) as SkillLevel | null;
   const favoriteResorts = formData.getAll("favoriteResorts") as string[];
+  const slopesConnected = formData.get("slopesConnected") === "true";
 
   if (!name) return { error: "Name is required." };
 
   updateUser(session.userId, {
     name,
+    bio: bio || undefined,
+    avatarUrl: avatarUrl || undefined,
+    coverUrl: coverUrl || undefined,
     skillLevel: skillLevel ?? undefined,
     favoriteResorts,
+    slopesConnected,
   });
 
   revalidatePath("/profile");

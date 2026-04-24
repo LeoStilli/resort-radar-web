@@ -65,7 +65,11 @@ export function ProfileForm({ user }: Props) {
   );
 
   const [name, setName] = useState(user.name);
+  const [bio, setBio] = useState(user.bio ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? "");
+  const [coverUrl, setCoverUrl] = useState(user.coverUrl ?? "");
   const [skillLevel, setSkillLevel] = useState(user.skillLevel ?? "");
+  const [slopesConnected, setSlopesConnected] = useState(user.slopesConnected ?? false);
   const [favorites, setFavorites] = useState<Set<string>>(
     new Set(user.favoriteResorts ?? [])
   );
@@ -84,34 +88,111 @@ export function ProfileForm({ user }: Props) {
       {[...favorites].map((id) => (
         <input key={id} type="hidden" name="favoriteResorts" value={id} />
       ))}
+      <input type="hidden" name="slopesConnected" value={slopesConnected ? "true" : "false"} />
 
       {state?.error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
           {state.error}
         </div>
       )}
       {state?.success && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
           Profile saved successfully.
         </div>
       )}
 
-      {/* Name */}
-      <div className="space-y-2">
-        <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-widest text-foreground/40">
-          Display Name
-        </label>
-        <input
-          id="name" name="name" type="text" required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-2xl border border-gray-200 bg-cream px-5 py-3.5 text-sm text-foreground outline-none transition focus:border-navy focus:ring-2 focus:ring-navy/10"
-        />
+      {/* Identity */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-widest text-white/35">
+            Display Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-gold/40 focus:bg-white/8"
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="bio" className="block text-xs font-semibold uppercase tracking-widest text-white/35">
+            Bio
+          </label>
+          <input
+            id="bio"
+            name="bio"
+            type="text"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="A sentence about you…"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-gold/40 focus:bg-white/8"
+          />
+        </div>
+      </div>
+
+      {/* Profile images */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2">
+          <label htmlFor="avatarUrl" className="block text-xs font-semibold uppercase tracking-widest text-white/35">
+            Avatar URL
+          </label>
+          <input
+            id="avatarUrl"
+            name="avatarUrl"
+            type="url"
+            value={avatarUrl}
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            placeholder="https://…"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-gold/40 focus:bg-white/8"
+          />
+          {avatarUrl && (
+            <div className="mt-2 flex items-center gap-3">
+              <img
+                src={avatarUrl}
+                alt="Avatar preview"
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-gold/30"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+              <span className="text-xs text-white/35">Preview</span>
+            </div>
+          )}
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="coverUrl" className="block text-xs font-semibold uppercase tracking-widest text-white/35">
+            Cover Image URL
+          </label>
+          <input
+            id="coverUrl"
+            name="coverUrl"
+            type="url"
+            value={coverUrl}
+            onChange={(e) => setCoverUrl(e.target.value)}
+            placeholder="https://…"
+            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-gold/40 focus:bg-white/8"
+          />
+          {coverUrl && (
+            <div className="mt-2 overflow-hidden rounded-xl">
+              <img
+                src={coverUrl}
+                alt="Cover preview"
+                className="h-16 w-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Skill level */}
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-foreground/40">Skill Level</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/35">Skill Level</p>
         <input type="hidden" name="skillLevel" value={skillLevel} />
         <div className="grid grid-cols-2 gap-3">
           {SKILL_LEVELS.map((level) => {
@@ -123,14 +204,14 @@ export function ProfileForm({ user }: Props) {
                 onClick={() => setSkillLevel(level.value)}
                 className={`flex items-start gap-3 rounded-2xl border p-4 text-left transition ${
                   selected
-                    ? "border-gold bg-navy text-white"
-                    : "border-gray-200 bg-cream text-foreground hover:border-navy/30"
+                    ? "border-gold/50 bg-gold/10 text-white"
+                    : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
                 }`}
               >
-                <span className={selected ? "text-gold" : "text-navy"}>{level.icon}</span>
+                <span className={selected ? "text-gold" : "text-white/40"}>{level.icon}</span>
                 <div>
                   <p className="text-sm font-semibold">{level.label}</p>
-                  <p className={`text-xs ${selected ? "text-white/60" : "text-foreground/40"}`}>
+                  <p className={`text-xs ${selected ? "text-white/55" : "text-white/30"}`}>
                     {level.desc}
                   </p>
                 </div>
@@ -140,12 +221,45 @@ export function ProfileForm({ user }: Props) {
         </div>
       </div>
 
+      {/* Slopes integration */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/35">Integrations</p>
+        <button
+          type="button"
+          onClick={() => setSlopesConnected(!slopesConnected)}
+          className={`flex w-full items-center justify-between rounded-2xl border p-4 transition ${
+            slopesConnected
+              ? "border-purple-400/40 bg-purple-500/10"
+              : "border-white/10 bg-white/5 hover:border-white/20"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🔗</span>
+            <div className="text-left">
+              <p className={`text-sm font-semibold ${slopesConnected ? "text-purple-300" : "text-white/70"}`}>
+                Slopes App
+              </p>
+              <p className="text-xs text-white/30">
+                {slopesConnected ? "Connected — earns you the Slopes Connected badge" : "Connect to track your runs and earn a badge"}
+              </p>
+            </div>
+          </div>
+          <div
+            className={`flex h-6 w-10 items-center rounded-full transition-colors ${
+              slopesConnected ? "bg-purple-500 justify-end" : "bg-white/15 justify-start"
+            }`}
+          >
+            <div className="mx-0.5 h-5 w-5 rounded-full bg-white shadow-sm" />
+          </div>
+        </button>
+      </div>
+
       {/* Favourite resorts */}
       <div className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-foreground/40">
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/35">
           Favourite Resorts
-          <span className="ml-2 font-normal normal-case text-foreground/30">
-            — used to personalise AI recommendations
+          <span className="ml-2 font-normal normal-case text-white/20">
+            — for AI recommendations
           </span>
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -156,10 +270,10 @@ export function ProfileForm({ user }: Props) {
                 key={resort.id}
                 type="button"
                 onClick={() => toggleFavorite(resort.id)}
-                className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left transition ${
+                className={`group flex items-center gap-3 overflow-hidden rounded-2xl border p-3 text-left transition ${
                   selected
-                    ? "border-gold bg-navy"
-                    : "border-gray-200 bg-cream hover:border-navy/30"
+                    ? "border-gold/40 bg-gold/10"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
                 }`}
               >
                 <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-xl">
@@ -172,16 +286,14 @@ export function ProfileForm({ user }: Props) {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className={`truncate text-sm font-semibold ${selected ? "text-white" : "text-foreground"}`}>
+                  <p className={`truncate text-sm font-semibold ${selected ? "text-gold" : "text-white/70"}`}>
                     {resort.name}
                   </p>
-                  <p className={`truncate text-xs ${selected ? "text-white/50" : "text-foreground/40"}`}>
-                    {resort.location}
-                  </p>
+                  <p className="truncate text-xs text-white/30">{resort.location}</p>
                 </div>
                 <div
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
-                    selected ? "border-gold bg-gold" : "border-gray-300"
+                    selected ? "border-gold bg-gold" : "border-white/20"
                   }`}
                 >
                   {selected && (
@@ -199,9 +311,9 @@ export function ProfileForm({ user }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-gold px-8 py-3.5 text-sm font-semibold text-navy transition hover:bg-gold-light disabled:opacity-60"
+        className="rounded-full bg-gold px-8 py-3.5 text-sm font-semibold text-navy transition hover:bg-amber-400 disabled:opacity-60"
       >
-        {pending ? "Saving…" : "Save Profile"}
+        {pending ? "Saving…" : "Save Changes"}
       </button>
     </form>
   );

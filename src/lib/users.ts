@@ -13,9 +13,15 @@ export interface User {
   name: string;
   passwordHash: string;
   createdAt: string;
+  bio?: string;
+  avatarUrl?: string;
+  coverUrl?: string;
+  slopesConnected?: boolean;
   skillLevel?: SkillLevel;
   favoriteResorts?: string[];
   likedResorts?: string[];
+  followers?: string[];
+  following?: string[];
 }
 
 function readUsers(): User[] {
@@ -64,7 +70,7 @@ export async function createUser(
 
 export function updateUser(
   id: string,
-  updates: Partial<Pick<User, "skillLevel" | "favoriteResorts" | "likedResorts" | "name">>
+  updates: Partial<Pick<User, "name" | "bio" | "avatarUrl" | "coverUrl" | "slopesConnected" | "skillLevel" | "favoriteResorts" | "likedResorts" | "followers" | "following">>
 ): User | undefined {
   const users = readUsers();
   const idx = users.findIndex((u) => u.id === id);
