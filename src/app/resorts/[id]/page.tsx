@@ -50,12 +50,16 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
 
   let initialLiked = false;
   let userHasReviewed = false;
+  let userPasses: string[] = [];
 
   if (session) {
     const user = findUserById(session.userId);
     initialLiked = user?.likedResorts?.includes(id) ?? false;
     userHasReviewed = hasUserReviewed(id, session.userId);
+    userPasses = user?.skiPasses ?? [];
   }
+
+  const coveredByPasses = resort.passes.filter((p) => userPasses.includes(p.passId));
 
   const { openRuns, isOpen } = getOpenStats(resort.trails, weather);
   const avgRating =
@@ -127,6 +131,11 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
                   >
                     {isOpen ? "● Open" : "● Closed"}
                   </span>
+                  {coveredByPasses.length > 0 && (
+                    <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-semibold text-gold ring-1 ring-gold/30">
+                      ✓ Pass Covered
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-md md:text-6xl">
                   {resort.name}
@@ -141,6 +150,35 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </section>
+
+      {/* ── Pass Coverage Banner ── */}
+      {coveredByPasses.length > 0 && (
+        <section className="border-b border-emerald-500/20 bg-emerald-500/10">
+          <div className="mx-auto max-w-7xl px-6 py-4 lg:px-10">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <div className="flex items-center gap-2">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5 shrink-0 text-emerald-400">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-bold text-emerald-300">You can ski here with your pass</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {coveredByPasses.map((p) => (
+                  <div key={p.passId} className="flex items-center gap-2 rounded-xl bg-emerald-500/15 px-4 py-1.5 ring-1 ring-emerald-500/30">
+                    <span className="text-sm font-semibold text-white">{p.passName}</span>
+                    <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-xs font-bold text-emerald-300">
+                      {p.access}
+                    </span>
+                    {p.blackouts && (
+                      <span className="text-xs text-emerald-400/50">· holiday blackouts apply</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Live Conditions Bar ── */}
       {weather && (
@@ -263,6 +301,61 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
 
           {/* Right sidebar */}
           <div className="space-y-4">
+            {resort.passes.length > 0 && (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+                  Accepted Passes
+                </p>
+                <div className="space-y-2.5">
+                  {resort.passes.map((p) => {
+                    const owned = userPasses.includes(p.passId);
+                    return (
+                      <div
+                        key={p.passId}
+                        className={`flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 ring-1 transition ${
+                          owned
+                            ? "bg-emerald-500/10 ring-emerald-500/30"
+                            : "bg-white/5 ring-white/8"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          {owned ? (
+                            <svg viewBox="0 0 16 16" fill="currentColor" className="h-4 w-4 shrink-0 text-emerald-400">
+                              <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.707-9.293a1 1 0 00-1.414-1.414L5 8.586 3.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 shrink-0 text-white/25">
+                              <rect x="2" y="2" width="12" height="12" rx="6" stroke="currentColor" strokeWidth="1.5" />
+                            </svg>
+                          )}
+                          <div>
+                            <p className={`text-sm font-semibold ${owned ? "text-emerald-300" : "text-white/60"}`}>
+                              {p.passName}
+                            </p>
+                            {p.blackouts && (
+                              <p className="text-[11px] text-white/30">Holiday blackouts</p>
+                            )}
+                          </div>
+                        </div>
+                        <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${owned ? "bg-emerald-400/15 text-emerald-300" : "bg-white/8 text-white/40"}`}>
+                          {p.access}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {userPasses.length === 0 && (
+                  <p className="mt-3 text-[11px] text-white/25">
+                    Add your passes in{" "}
+                    <a href="/profile" className="underline hover:text-white/50">
+                      your profile
+                    </a>{" "}
+                    to see which apply to you.
+                  </p>
+                )}
+              </div>
+            )}
+
             <LikeButton
               toggleAction={boundToggle}
               initialLiked={initialLiked}

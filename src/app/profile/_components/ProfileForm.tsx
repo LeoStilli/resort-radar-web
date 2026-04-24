@@ -6,6 +6,27 @@ import { updateProfile, type ProfileState } from "@/lib/actions/profile";
 import { RESORTS } from "@/lib/resorts";
 import type { User } from "@/lib/users";
 
+const SKI_PASSES = [
+  {
+    id: "epic",
+    name: "Epic Pass",
+    desc: "Unlimited access to Vail, Breckenridge, Park City, Mammoth + 40 more resorts worldwide",
+    color: "sky",
+  },
+  {
+    id: "ikon",
+    name: "Ikon Pass",
+    desc: "Unlimited or limited days at Steamboat, Big Sky, Aspen, Jackson Hole, Telluride, Killington + more",
+    color: "blue",
+  },
+  {
+    id: "mountain-collective",
+    name: "Mountain Collective",
+    desc: "2 days each at Jackson Hole, Big Sky, Aspen, Telluride + other independent resorts",
+    color: "emerald",
+  },
+];
+
 const SKILL_LEVELS = [
   {
     value: "beginner",
@@ -70,9 +91,21 @@ export function ProfileForm({ user }: Props) {
   const [coverUrl, setCoverUrl] = useState(user.coverUrl ?? "");
   const [skillLevel, setSkillLevel] = useState(user.skillLevel ?? "");
   const [slopesConnected, setSlopesConnected] = useState(user.slopesConnected ?? false);
+  const [passes, setPasses] = useState<Set<string>>(
+    new Set(user.skiPasses ?? [])
+  );
   const [favorites, setFavorites] = useState<Set<string>>(
     new Set(user.favoriteResorts ?? [])
   );
+
+  function togglePass(id: string) {
+    setPasses((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function toggleFavorite(id: string) {
     setFavorites((prev) => {
@@ -87,6 +120,9 @@ export function ProfileForm({ user }: Props) {
     <form action={action} className="space-y-10">
       {[...favorites].map((id) => (
         <input key={id} type="hidden" name="favoriteResorts" value={id} />
+      ))}
+      {[...passes].map((id) => (
+        <input key={id} type="hidden" name="skiPasses" value={id} />
       ))}
       <input type="hidden" name="slopesConnected" value={slopesConnected ? "true" : "false"} />
 
@@ -252,6 +288,51 @@ export function ProfileForm({ user }: Props) {
             <div className="mx-0.5 h-5 w-5 rounded-full bg-white shadow-sm" />
           </div>
         </button>
+      </div>
+
+      {/* Ski passes */}
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/35">
+          Ski Passes
+          <span className="ml-2 font-normal normal-case text-white/20">
+            — see which resorts are free with your pass
+          </span>
+        </p>
+        <div className="space-y-2">
+          {SKI_PASSES.map((pass) => {
+            const selected = passes.has(pass.id);
+            return (
+              <button
+                key={pass.id}
+                type="button"
+                onClick={() => togglePass(pass.id)}
+                className={`flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition ${
+                  selected
+                    ? "border-gold/40 bg-gold/10"
+                    : "border-white/10 bg-white/5 hover:border-white/20"
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className={`text-sm font-semibold ${selected ? "text-gold" : "text-white/75"}`}>
+                    {pass.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-white/30">{pass.desc}</p>
+                </div>
+                <div
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition ${
+                    selected ? "border-gold bg-gold" : "border-white/20"
+                  }`}
+                >
+                  {selected && (
+                    <svg viewBox="0 0 12 12" fill="none" className="h-3 w-3">
+                      <path d="M2 6l3 3 5-5" stroke="#0c1a2a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Favourite resorts */}

@@ -23,6 +23,7 @@ export async function updateProfile(
   const coverUrl = (formData.get("coverUrl") as string | null)?.trim() ?? "";
   const skillLevel = (formData.get("skillLevel") as string | null) as SkillLevel | null;
   const favoriteResorts = formData.getAll("favoriteResorts") as string[];
+  const skiPasses = formData.getAll("skiPasses") as string[];
   const slopesConnected = formData.get("slopesConnected") === "true";
 
   if (!name) return { error: "Name is required." };
@@ -34,6 +35,7 @@ export async function updateProfile(
     coverUrl: coverUrl || undefined,
     skillLevel: skillLevel ?? undefined,
     favoriteResorts,
+    skiPasses,
     slopesConnected,
   });
 

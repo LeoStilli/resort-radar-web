@@ -18,17 +18,26 @@ export async function POST(req: Request) {
 
   const resorts = await fetchAllResortWeather();
 
+  const userPassIds = user?.skiPasses ?? [];
+
   const resortSummary = resorts
     .map((r) => {
       const w = r.weather;
-      if (!w) return `${r.name} (${r.location}): data unavailable`;
+      const passInfo = r.passes.length > 0
+        ? ` Passes accepted: ${r.passes.map((p) => `${p.passName} (${p.access}${p.blackouts ? ", holiday blackouts" : ""})`).join(", ")}.`
+        : "";
+      const userCoverage = r.passes.filter((p) => userPassIds.includes(p.passId));
+      const coverageInfo = userCoverage.length > 0
+        ? ` USER CAN VISIT FREE with their ${userCoverage.map((p) => `${p.passName} (${p.access})`).join(" / ")}.`
+        : "";
+      if (!w) return `${r.name} (${r.location}): data unavailable.${passInfo}${coverageInfo}`;
       return (
         `${r.name} (${r.location}): ${w.condition}, ` +
         `${w.tempF}°F, snow depth ${w.snowDepthFt} ft, ` +
         `${w.snowfallTodayIn}" new snow today, wind ${w.windMph} mph. ` +
         `${r.trails} trails, ${r.vertical} vertical. ` +
         `Difficulty: ${r.difficulty.green}% green / ${r.difficulty.blue}% blue / ${r.difficulty.black}% black. ` +
-        `Terrain: ${r.terrain.join(", ")}.`
+        `Terrain: ${r.terrain.join(", ")}.${passInfo}${coverageInfo}`
       );
     })
     .join("\n");
@@ -38,6 +47,9 @@ export async function POST(req: Request) {
       (user.skillLevel ? ` Skill level: ${user.skillLevel}.` : "") +
       (user.favoriteResorts?.length
         ? ` Favourite resorts: ${user.favoriteResorts.join(", ")}.`
+        : "") +
+      (userPassIds.length > 0
+        ? ` Ski passes owned: ${userPassIds.join(", ")}. When recommending resorts, prioritise ones covered by their passes and mention the pass coverage explicitly.`
         : "")
     : "";
 

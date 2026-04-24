@@ -16,6 +16,13 @@ export interface Hotel {
   amenities: string[];
 }
 
+export interface PassCoverage {
+  passId: string;
+  passName: string;
+  access: string;
+  blackouts: boolean;
+}
+
 export interface Resort {
   id: string;
   name: string;
@@ -36,6 +43,7 @@ export interface Resort {
   avgTicketPrice: number;
   description: string;
   hotels: Hotel[];
+  passes: PassCoverage[];
   weather?: ResortWeather | null;
 }
 
@@ -59,6 +67,10 @@ export const RESORTS: Resort[] = [
       { name: "Hotel Terra Jackson Hole", stars: 4, pricePerNight: 450, distanceMiles: 0.3, amenities: ["Rooftop Bar", "Hot Tubs", "Mountain Views", "Shuttle"] },
       { name: "Teton Mountain Lodge & Spa", stars: 4, pricePerNight: 320, distanceMiles: 0.5, amenities: ["Outdoor Pool", "Spa", "Ski Storage", "Fireplace Suites"] },
     ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true },
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false },
+    ],
   },
   {
     id: "vail",
@@ -78,6 +90,9 @@ export const RESORTS: Resort[] = [
       { name: "The Lodge at Vail", stars: 5, pricePerNight: 950, distanceMiles: 0.1, amenities: ["Slope Access", "Spa", "Heated Pool", "Concierge"] },
       { name: "Sonnenalp Vail", stars: 4, pricePerNight: 680, distanceMiles: 0.2, amenities: ["European Spa", "Fine Dining", "Indoor Pool", "Ski Valet"] },
       { name: "Vail Mountain Lodge", stars: 4, pricePerNight: 420, distanceMiles: 0.4, amenities: ["Ski-in/Ski-out", "Hot Tub", "Restaurant", "Locker Room"] },
+    ],
+    passes: [
+      { passId: "epic", passName: "Epic Pass", access: "Unlimited", blackouts: false },
     ],
   },
   {
@@ -99,6 +114,10 @@ export const RESORTS: Resort[] = [
       { name: "Madeline Hotel & Residences", stars: 4, pricePerNight: 520, distanceMiles: 0.5, amenities: ["Rooftop Pool", "Fine Dining", "Ski Concierge", "Fireplace Rooms"] },
       { name: "Hotel Telluride", stars: 3, pricePerNight: 280, distanceMiles: 0.3, amenities: ["Mountain Views", "Bar & Lounge", "Walk to Lifts", "Boutique Style"] },
     ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "5 days", blackouts: true },
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false },
+    ],
   },
   {
     id: "aspen",
@@ -118,6 +137,10 @@ export const RESORTS: Resort[] = [
       { name: "The Little Nell", stars: 5, pricePerNight: 1800, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Michelin Dining", "Spa", "Butler Service"] },
       { name: "The St. Regis Aspen", stars: 5, pricePerNight: 1500, distanceMiles: 0.2, amenities: ["Butler Service", "Luxury Spa", "Heated Pool", "Ski Concierge"] },
       { name: "Hotel Jerome", stars: 4, pricePerNight: 550, distanceMiles: 0.3, amenities: ["Historic Landmark", "J-Bar", "Mountain Views", "Fitness Center"] },
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true },
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false },
     ],
   },
   {
@@ -139,6 +162,9 @@ export const RESORTS: Resort[] = [
       { name: "Park City Marriott", stars: 4, pricePerNight: 280, distanceMiles: 0.5, amenities: ["Heated Pool", "Fitness Center", "Ski Shuttle", "Restaurant"] },
       { name: "Treasure Mountain Inn", stars: 3, pricePerNight: 160, distanceMiles: 0.4, amenities: ["Walk to Lifts", "Outdoor Hot Tub", "Free Parking", "Historic District"] },
     ],
+    passes: [
+      { passId: "epic", passName: "Epic Pass", access: "Unlimited", blackouts: false },
+    ],
   },
   {
     id: "breckenridge",
@@ -158,6 +184,9 @@ export const RESORTS: Resort[] = [
       { name: "Grand Hyatt Breckenridge", stars: 4, pricePerNight: 480, distanceMiles: 0.2, amenities: ["Ski-in/Ski-out", "Spa", "Rooftop Pool", "Multiple Restaurants"] },
       { name: "Village at Breckenridge", stars: 3, pricePerNight: 240, distanceMiles: 0.1, amenities: ["Slope Access", "Kitchen Units", "Hot Tub", "Ski Storage"] },
       { name: "Beaver Run Resort", stars: 3, pricePerNight: 200, distanceMiles: 0.3, amenities: ["Indoor Pool", "Hot Tubs", "Conference Rooms", "Restaurant"] },
+    ],
+    passes: [
+      { passId: "epic", passName: "Epic Pass", access: "Unlimited", blackouts: false },
     ],
   },
   {
@@ -179,6 +208,9 @@ export const RESORTS: Resort[] = [
       { name: "Mammoth Mountain Inn", stars: 3, pricePerNight: 220, distanceMiles: 0.1, amenities: ["Gondola Access", "Restaurant", "Ski Storage", "Mountain Views"] },
       { name: "Juniper Springs Resort", stars: 3, pricePerNight: 260, distanceMiles: 0.6, amenities: ["Hot Springs Pool", "Kitchen Units", "Shuttle", "Fitness Center"] },
     ],
+    passes: [
+      { passId: "epic", passName: "Epic Pass", access: "Unlimited", blackouts: true },
+    ],
   },
   {
     id: "steamboat",
@@ -198,6 +230,9 @@ export const RESORTS: Resort[] = [
       { name: "The Steamboat Grand", stars: 4, pricePerNight: 340, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Heated Pool", "Spa", "Multiple Dining Options"] },
       { name: "Sheraton Steamboat Resort", stars: 4, pricePerNight: 290, distanceMiles: 0.3, amenities: ["Slope Views", "Indoor Pool", "Fitness Center", "Ski Shuttle"] },
       { name: "Ptarmigan Inn", stars: 3, pricePerNight: 180, distanceMiles: 0.5, amenities: ["Mountain Views", "Free Shuttle", "Hot Tub", "Budget-Friendly"] },
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "Unlimited", blackouts: false },
     ],
   },
   {
@@ -219,6 +254,10 @@ export const RESORTS: Resort[] = [
       { name: "Huntley Lodge", stars: 3, pricePerNight: 280, distanceMiles: 0.2, amenities: ["Indoor Pool", "Hot Tubs", "Mountain Village", "Family Suites"] },
       { name: "Mountain Village Center Condos", stars: 3, pricePerNight: 220, distanceMiles: 0.5, amenities: ["Full Kitchen", "Mountain Views", "Free Parking", "Ski Storage"] },
     ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "Unlimited", blackouts: false },
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false },
+    ],
   },
   {
     id: "killington",
@@ -238,6 +277,9 @@ export const RESORTS: Resort[] = [
       { name: "The Grand Killington", stars: 4, pricePerNight: 380, distanceMiles: 0.5, amenities: ["Ski Shuttle", "Spa", "Indoor Pool", "Restaurant"] },
       { name: "Killington Mountain Lodge", stars: 4, pricePerNight: 320, distanceMiles: 0.2, amenities: ["Slope Access", "Bar & Grill", "Hot Tub", "Ski Storage"] },
       { name: "Sunrise Village Condominiums", stars: 3, pricePerNight: 180, distanceMiles: 0.8, amenities: ["Full Kitchen", "Free Shuttle", "Indoor Pool", "Fireplace"] },
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true },
     ],
   },
 ];

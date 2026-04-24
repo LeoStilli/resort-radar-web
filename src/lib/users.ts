@@ -22,6 +22,7 @@ export interface User {
   likedResorts?: string[];
   followers?: string[];
   following?: string[];
+  skiPasses?: string[];
 }
 
 function readUsers(): User[] {
@@ -70,7 +71,7 @@ export async function createUser(
 
 export function updateUser(
   id: string,
-  updates: Partial<Pick<User, "name" | "bio" | "avatarUrl" | "coverUrl" | "slopesConnected" | "skillLevel" | "favoriteResorts" | "likedResorts" | "followers" | "following">>
+  updates: Partial<Pick<User, "name" | "bio" | "avatarUrl" | "coverUrl" | "slopesConnected" | "skillLevel" | "favoriteResorts" | "likedResorts" | "followers" | "following" | "skiPasses">>
 ): User | undefined {
   const users = readUsers();
   const idx = users.findIndex((u) => u.id === id);

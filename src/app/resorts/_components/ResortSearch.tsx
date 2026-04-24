@@ -17,6 +17,24 @@ const SORTS = [
   { value: "price-desc", label: "Price: High → Low" },
 ];
 
+const PASS_FILTERS = [
+  { id: "epic", label: "Epic Pass", activeClass: "bg-sky-500 text-white", dotClass: "bg-sky-400" },
+  { id: "ikon", label: "Ikon Pass", activeClass: "bg-blue-600 text-white", dotClass: "bg-blue-400" },
+  { id: "mountain-collective", label: "Mountain Collective", activeClass: "bg-emerald-600 text-white", dotClass: "bg-emerald-400" },
+];
+
+const PASS_BADGE_STYLES: Record<string, { bg: string; text: string; ring: string }> = {
+  "epic": { bg: "bg-sky-500/15", text: "text-sky-300", ring: "ring-sky-500/30" },
+  "ikon": { bg: "bg-blue-500/15", text: "text-blue-300", ring: "ring-blue-500/30" },
+  "mountain-collective": { bg: "bg-emerald-500/15", text: "text-emerald-300", ring: "ring-emerald-500/30" },
+};
+
+const PASS_SHORT: Record<string, string> = {
+  "epic": "Epic",
+  "ikon": "Ikon",
+  "mountain-collective": "MC",
+};
+
 interface StarRatingProps {
   rating: number;
 }
@@ -63,12 +81,16 @@ function PriceLevel({ level, price }: PriceLevelProps) {
 
 interface ResortCardProps {
   resort: ResortWithWeather;
+  userPasses: string[];
 }
 
-function ResortCard({ resort }: ResortCardProps) {
+function ResortCard({ resort, userPasses }: ResortCardProps) {
   const w = resort.weather;
   const { openRuns, isOpen } = getOpenStats(resort.trails, w ?? null);
   const openPct = resort.trails > 0 ? (openRuns / resort.trails) * 100 : 0;
+
+  const coveredPasses = resort.passes.filter((p) => userPasses.includes(p.passId));
+  const allPasses = resort.passes;
 
   return (
     <Link href={`/resorts/${resort.id}`} className="group flex flex-col overflow-hidden rounded-2xl bg-navy-light ring-1 ring-white/10 transition duration-300 hover:-translate-y-0.5 hover:ring-gold/30 hover:shadow-xl hover:shadow-navy/40">
@@ -95,6 +117,23 @@ function ResortCard({ resort }: ResortCardProps) {
         >
           {isOpen ? "● Open" : "● Closed"}
         </div>
+
+        {/* "Your pass" banner on the image if user is covered */}
+        {coveredPasses.length > 0 && (
+          <div className="absolute bottom-14 left-3 flex flex-wrap gap-1">
+            {coveredPasses.map((p) => (
+              <span
+                key={p.passId}
+                className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm"
+              >
+                <svg viewBox="0 0 16 16" fill="currentColor" className="h-3 w-3">
+                  <path fillRule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm3.707-9.293a1 1 0 00-1.414-1.414L7 7.586 5.707 6.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Free with your {PASS_SHORT[p.passId] ?? p.passName}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="absolute bottom-3 left-4 right-4">
           <h3 className="text-lg font-bold tracking-tight text-white">{resort.name}</h3>
@@ -150,18 +189,42 @@ function ResortCard({ resort }: ResortCardProps) {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-1.5">
-          {resort.terrain.slice(0, 3).map((t) => (
-            <span key={t} className="rounded-full bg-white/8 px-2.5 py-0.5 text-[11px] text-white/50">
-              {t}
-            </span>
-          ))}
-          {resort.terrain.length > 3 && (
-            <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/30">
-              +{resort.terrain.length - 3}
-            </span>
-          )}
-        </div>
+        {/* Pass badges row */}
+        {allPasses.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 border-t border-white/8 pt-3">
+            {allPasses.map((p) => {
+              const isOwned = userPasses.includes(p.passId);
+              const style = PASS_BADGE_STYLES[p.passId];
+              return (
+                <span
+                  key={p.passId}
+                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 ${
+                    isOwned && style
+                      ? `${style.bg} ${style.text} ${style.ring}`
+                      : "bg-white/8 text-white/40 ring-white/10"
+                  }`}
+                >
+                  {isOwned ? "✓ " : ""}{PASS_SHORT[p.passId] ?? p.passName} · {p.access}
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        {allPasses.length === 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {resort.terrain.slice(0, 3).map((t) => (
+              <span key={t} className="rounded-full bg-white/8 px-2.5 py-0.5 text-[11px] text-white/50">
+                {t}
+              </span>
+            ))}
+            {resort.terrain.length > 3 && (
+              <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/30">
+                +{resort.terrain.length - 3}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -169,11 +232,13 @@ function ResortCard({ resort }: ResortCardProps) {
 
 interface ResortSearchProps {
   resorts: ResortWithWeather[];
+  userPasses: string[];
 }
 
-export function ResortSearch({ resorts }: ResortSearchProps) {
+export function ResortSearch({ resorts, userPasses }: ResortSearchProps) {
   const [query, setQuery] = useState("");
   const [stateFilter, setStateFilter] = useState("All");
+  const [passFilter, setPassFilter] = useState<string | null>(null);
   const [sort, setSort] = useState("rating");
 
   const filtered = useMemo(() => {
@@ -194,6 +259,10 @@ export function ResortSearch({ resorts }: ResortSearchProps) {
       result = result.filter((r) => r.state === stateFilter);
     }
 
+    if (passFilter) {
+      result = result.filter((r) => r.passes.some((p) => p.passId === passFilter));
+    }
+
     return [...result].sort((a, b) => {
       if (sort === "rating") return b.rating - a.rating;
       if (sort === "snow") return (b.weather?.snowDepthFt ?? 0) - (a.weather?.snowDepthFt ?? 0);
@@ -201,11 +270,11 @@ export function ResortSearch({ resorts }: ResortSearchProps) {
       if (sort === "price-desc") return b.avgTicketPrice - a.avgTicketPrice;
       return 0;
     });
-  }, [resorts, query, stateFilter, sort]);
+  }, [resorts, query, stateFilter, passFilter, sort]);
 
   return (
     <>
-      {/* Page header — pt-24 clears the fixed nav (~64 px) */}
+      {/* Page header */}
       <div className="bg-navy pb-12 pt-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <p className="text-sm font-semibold uppercase tracking-wide text-gold">US Ski Resorts</p>
@@ -240,37 +309,78 @@ export function ResortSearch({ resorts }: ResortSearchProps) {
       </div>
 
       {/* Sticky filter bar */}
-      <div className="sticky top-0 z-20 border-b border-gray-200 bg-white/90 py-3.5 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-6 lg:px-10">
-          <div className="flex flex-wrap gap-2">
-            {STATES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setStateFilter(s)}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                  stateFilter === s
-                    ? "bg-navy text-white shadow-sm"
-                    : "bg-gray-100 text-foreground/60 hover:bg-gray-200"
-                }`}
+      <div className="sticky top-0 z-20 border-b border-gray-200 bg-white/90 py-3 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+          {/* Row 1: state filters + sort */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2">
+              {STATES.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setStateFilter(s)}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    stateFilter === s
+                      ? "bg-navy text-white shadow-sm"
+                      : "bg-gray-100 text-foreground/60 hover:bg-gray-200"
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-foreground/40">Sort:</span>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value)}
+                className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-foreground/70 outline-none transition hover:border-gray-300"
               >
-                {s}
-              </button>
-            ))}
+                {SORTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-foreground/40">Sort:</span>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-foreground/70 outline-none transition hover:border-gray-300"
+          {/* Row 2: pass filters */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+            <span className="text-xs text-foreground/35 font-medium">Pass:</span>
+            <button
+              onClick={() => setPassFilter(null)}
+              className={`rounded-full px-3.5 py-1 text-xs font-medium transition ${
+                passFilter === null
+                  ? "bg-navy text-white shadow-sm"
+                  : "bg-gray-100 text-foreground/60 hover:bg-gray-200"
+              }`}
             >
-              {SORTS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
+              All
+            </button>
+            {PASS_FILTERS.map((p) => {
+              const isOwned = userPasses.includes(p.id);
+              const isActive = passFilter === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => setPassFilter(isActive ? null : p.id)}
+                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-medium transition ${
+                    isActive
+                      ? p.activeClass
+                      : "bg-gray-100 text-foreground/60 hover:bg-gray-200"
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-white" : p.dotClass}`} />
+                  {p.label}
+                  {isOwned && (
+                    <span className={`rounded-full px-1.5 py-px text-[10px] font-bold ${isActive ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-700"}`}>
+                      YOURS
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -284,6 +394,7 @@ export function ResortSearch({ resorts }: ResortSearchProps) {
               onClick={() => {
                 setQuery("");
                 setStateFilter("All");
+                setPassFilter(null);
               }}
               className="mt-4 text-sm text-gold transition hover:underline"
             >
@@ -294,10 +405,15 @@ export function ResortSearch({ resorts }: ResortSearchProps) {
           <>
             <p className="mb-6 text-sm text-foreground/40">
               {filtered.length} resort{filtered.length !== 1 ? "s" : ""} found
+              {passFilter && (
+                <span className="ml-2 text-foreground/30">
+                  · filtered by {PASS_FILTERS.find((p) => p.id === passFilter)?.label}
+                </span>
+              )}
             </p>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((resort) => (
-                <ResortCard key={resort.id} resort={resort} />
+                <ResortCard key={resort.id} resort={resort} userPasses={userPasses} />
               ))}
             </div>
           </>
