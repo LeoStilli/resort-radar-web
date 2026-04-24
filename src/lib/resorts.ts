@@ -127,7 +127,7 @@ export const RESORTS: Resort[] = [
     state: "UT",
     country: "USA",
     region: "Wasatch Range",
-    image: "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=800&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1672115680958-54438df0ab82?w=800&q=80",
     lat: 40.6627, lon: -111.4978,
     trails: 330, totalLifts: 41, vertical: "3,226 ft",
     difficulty: { green: 17, blue: 52, black: 31 },

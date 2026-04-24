@@ -205,8 +205,8 @@ export function ResortSearch({ resorts }: ResortSearchProps) {
 
   return (
     <>
-      {/* Page header */}
-      <div className="bg-navy pb-12 pt-10">
+      {/* Page header — pt-24 clears the fixed nav (~64 px) */}
+      <div className="bg-navy pb-12 pt-24">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <p className="text-sm font-semibold uppercase tracking-wide text-gold">US Ski Resorts</p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-white md:text-5xl">

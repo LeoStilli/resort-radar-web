@@ -11,6 +11,7 @@ import { Nav } from "@/components/Nav";
 import { Chatbot } from "@/components/Chatbot";
 import { ProfileForm } from "./_components/ProfileForm";
 import { ShareButton } from "./_components/ShareButton";
+import { FollowStats, type FollowUser } from "./_components/FollowStats";
 
 export const metadata: Metadata = {
   title: "Your Profile — Resort Radar",
@@ -74,8 +75,19 @@ export default async function ProfilePage() {
   const earnedBadges = allSorted.filter((b) => earnedIds.has(b.id));
   const lockedBadges = allSorted.filter((b) => !earnedIds.has(b.id));
 
-  const followerCount = user.followers?.length ?? 0;
-  const followingCount = user.following?.length ?? 0;
+  const toFollowUser = (id: string): FollowUser | null => {
+    const u = findUserById(id);
+    if (!u) return null;
+    return { id: u.id, name: u.name, avatarUrl: u.avatarUrl };
+  };
+
+  const followerUsers: FollowUser[] = (user.followers ?? [])
+    .map(toFollowUser)
+    .filter((u): u is FollowUser => u !== null);
+
+  const followingUsers: FollowUser[] = (user.following ?? [])
+    .map(toFollowUser)
+    .filter((u): u is FollowUser => u !== null);
 
   return (
     <main className="min-h-screen bg-navy">
@@ -160,20 +172,13 @@ export default async function ProfilePage() {
             )}
             <p className="text-sm text-white/30">{user.email}</p>
 
-            {/* Stats row */}
-            <div className="mt-4 flex flex-wrap gap-6 pt-2">
-              {[
-                { value: userReviews.length, label: "Reviews" },
-                { value: likedResorts.length, label: "Liked" },
-                { value: followerCount, label: "Followers" },
-                { value: followingCount, label: "Following" },
-              ].map((s) => (
-                <div key={s.label}>
-                  <span className="text-xl font-bold text-white">{s.value}</span>
-                  <span className="ml-1.5 text-sm text-white/35">{s.label}</span>
-                </div>
-              ))}
-            </div>
+            {/* Stats row — Followers/Following are clickable */}
+            <FollowStats
+              reviewCount={userReviews.length}
+              likedCount={likedResorts.length}
+              followers={followerUsers}
+              following={followingUsers}
+            />
           </div>
         </div>
       </div>
