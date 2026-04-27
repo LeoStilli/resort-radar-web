@@ -12,6 +12,7 @@ import { Chatbot } from "@/components/Chatbot";
 import { ProfileForm } from "./_components/ProfileForm";
 import { ShareButton } from "./_components/ShareButton";
 import { FollowStats, type FollowUser } from "./_components/FollowStats";
+import { FindPeople } from "./_components/FindPeople";
 
 export const metadata: Metadata = {
   title: "Your Profile — Resort Radar",
@@ -179,6 +180,10 @@ export default async function ProfilePage() {
               followers={followerUsers}
               following={followingUsers}
             />
+
+            <div className="pt-1">
+              <FindPeople />
+            </div>
           </div>
         </div>
       </div>

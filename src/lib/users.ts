@@ -45,6 +45,22 @@ export function findUserById(id: string): User | undefined {
   return readUsers().find((u) => u.id === id);
 }
 
+export interface PublicUser {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  skillLevel?: SkillLevel;
+}
+
+export function searchUsers(query: string, excludeId: string): PublicUser[] {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase();
+  return readUsers()
+    .filter((u) => u.id !== excludeId && u.name.toLowerCase().includes(q))
+    .slice(0, 10)
+    .map(({ id, name, avatarUrl, skillLevel }) => ({ id, name, avatarUrl, skillLevel }));
+}
+
 export function getResortLikeCount(resortId: string): number {
   return readUsers().filter((u) => u.likedResorts?.includes(resortId) ?? false).length;
 }
