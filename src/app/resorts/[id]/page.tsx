@@ -12,6 +12,7 @@ import { Nav } from "@/components/Nav";
 import { Chatbot } from "@/components/Chatbot";
 import { LikeButton } from "./_components/LikeButton";
 import { ReviewForm } from "./_components/ReviewForm";
+import { TrailMap } from "./_components/TrailMap";
 
 function StarRow({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" | "lg" }) {
   const sizeClass = size === "lg" ? "h-6 w-6" : size === "md" ? "h-5 w-5" : "h-4 w-4";
@@ -437,6 +438,17 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
                 ))}
               </div>
             </section>
+
+            {/* Trail Map */}
+            {resort.trailMap && (
+              <section>
+                <h2 className="mb-5 text-2xl font-bold text-white">Trail Map</h2>
+                <TrailMap src={resort.trailMap} resortName={resort.name} />
+                <p className="mt-3 text-xs text-white/25">
+                  Click the map to view full size. Trail map provided by {resort.name}.
+                </p>
+              </section>
+            )}
           </div>
 
           {/* Right sidebar */}
