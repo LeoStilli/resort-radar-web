@@ -55,7 +55,7 @@ function ResortCard({
         </div>
         {w && (
           <div className="absolute right-3 top-3">
-            <ConditionBadge condition={w.condition} />
+            <ConditionBadge condition={w.overallCondition ?? w.condition} />
           </div>
         )}
         <div className="absolute bottom-3 left-3 right-3">
@@ -64,20 +64,26 @@ function ResortCard({
         </div>
       </div>
       {w ? (
-        <div className="grid grid-cols-3 divide-x divide-gray-100 border-t border-gray-100 text-center">
-          <div className="px-3 py-3">
-            <p className="text-xs text-foreground/40">New Snow</p>
+        <div className="grid grid-cols-4 divide-x divide-gray-100 border-t border-gray-100 text-center">
+          <div className="px-2 py-3">
+            <p className="text-xs text-foreground/40">Lifts</p>
+            <p className="text-sm font-semibold text-foreground">
+              {w.liftsOpen !== null ? `${w.liftsOpen}/${w.liftsTotal}` : "—"}
+            </p>
+          </div>
+          <div className="px-2 py-3">
+            <p className="text-xs text-foreground/40">New</p>
             <p className="text-sm font-semibold text-foreground">
               {w.snowfallTodayIn > 0 ? `${w.snowfallTodayIn}"` : "—"}
             </p>
           </div>
-          <div className="px-3 py-3">
+          <div className="px-2 py-3">
             <p className="text-xs text-foreground/40">Depth</p>
             <p className="text-sm font-semibold text-foreground">
-              {w.snowDepthFt > 0 ? `${w.snowDepthFt} ft` : "—"}
+              {w.snowDepthFt > 0 ? `${w.snowDepthFt}ft` : "—"}
             </p>
           </div>
-          <div className="px-3 py-3">
+          <div className="px-2 py-3">
             <p className="text-xs text-foreground/40">Temp</p>
             <p className="text-sm font-semibold text-foreground">{w.tempF}°F</p>
           </div>
@@ -107,10 +113,15 @@ export default async function HomePage() {
         ? `${r.weather.snowfallTodayIn}" new`
         : `${r.weather.snowDepthFt} ft base`
       : "—",
-    status: r.weather?.condition ?? "—",
-  }));
+    lifts: r.weather?.liftsOpen !== null && r.weather?.liftsOpen !== undefined
+      ? `${r.weather.liftsOpen}/${r.weather.liftsTotal ?? "?"} lifts`
+      : null,
+    status: r.weather?.overallCondition ?? r.weather?.condition ?? "—",
+  }))
 
-  const deepestBase = Math.max(...resorts.map((r) => r.weather?.snowDepthFt ?? 0));
+  const deepestBase = Math.max(...resorts.map((r) => r.weather?.snowDepthFt ?? 0))
+  const totalLiftsOpen = resorts.reduce((sum, r) => sum + (r.weather?.liftsOpen ?? 0), 0)
+  const totalLiftsAll = resorts.reduce((sum, r) => sum + (r.weather?.liftsTotal ?? r.totalLifts), 0)
 
   const mapResorts: MapResort[] = resorts.map((r) => ({
     id: r.id,
@@ -126,6 +137,11 @@ export default async function HomePage() {
           snowDepthFt: r.weather.snowDepthFt,
           snowfallTodayIn: r.weather.snowfallTodayIn,
           condition: r.weather.condition,
+          overallCondition: r.weather.overallCondition,
+          liftsOpen: r.weather.liftsOpen,
+          liftsTotal: r.weather.liftsTotal,
+          runsOpen: r.weather.runsOpen,
+          runsTotal: r.weather.runsTotal,
         }
       : null,
   }));
@@ -181,6 +197,9 @@ export default async function HomePage() {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               <span className="text-sm font-medium text-white">{c.resort}</span>
               <span className="text-sm text-white/50">{c.snow}</span>
+              {c.lifts && (
+                <span className="text-sm text-sky-400/80">{c.lifts}</span>
+              )}
               <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs text-white/70">{c.status}</span>
             </div>
           ))}
@@ -193,7 +212,7 @@ export default async function HomePage() {
           {[
             { value: "2,800+", label: "Resorts Worldwide" },
             { value: "24 / 7", label: "Live Updates" },
-            { value: "50+", label: "Countries Covered" },
+            { value: totalLiftsOpen > 0 ? `${totalLiftsOpen} / ${totalLiftsAll}` : '—', label: "Lifts Open Right Now" },
             { value: `${deepestBase.toFixed(1)} ft`, label: "Deepest Base Right Now" },
           ].map((stat) => (
             <div key={stat.label} className="px-6 py-8 text-center md:py-10">
@@ -214,7 +233,7 @@ export default async function HomePage() {
                 Where the snow is best right now
               </h2>
               <p className="mt-3 text-foreground/50">
-                Live conditions from Open-Meteo, updated every 15 minutes.
+                Live lift status, snow depth, and weather — updated every 15–30 minutes.
               </p>
             </div>
           </div>
@@ -281,7 +300,7 @@ export default async function HomePage() {
               {
                 icon: <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7 text-gold"><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" /><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>,
                 title: "Real-Time Conditions",
-                description: "Live snowfall, snow depth, temperature, and wind — pulled from Open-Meteo every 15 minutes for each resort.",
+                description: "Live lift status, open run counts, snow depth, snowfall, and wind — pulled from WorldWeatherOnline and Open-Meteo every 15–30 minutes.",
               },
               {
                 icon: <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7 text-gold"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>,
@@ -356,9 +375,12 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="mt-8 border-t border-gray-100 pt-6 text-center text-sm text-foreground/30">
-            &copy; 2026 Resort Radar. Conditions powered by{" "}
+            &copy; 2026 Resort Radar. Weather by{" "}
             <a href="https://open-meteo.com" className="underline underline-offset-2 hover:text-foreground/60">
               Open-Meteo
+            </a>. Ski conditions by{" "}
+            <a href="https://worldweatheronline.com" className="underline underline-offset-2 hover:text-foreground/60">
+              WorldWeatherOnline
             </a>. Map by{" "}
             <a href="https://carto.com" className="underline underline-offset-2 hover:text-foreground/60">CARTO</a>.
           </div>

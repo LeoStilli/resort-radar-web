@@ -61,7 +61,7 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
 
   const coveredByPasses = resort.passes.filter((p) => userPasses.includes(p.passId));
 
-  const { openRuns, isOpen } = getOpenStats(resort.trails, weather);
+  const { openRuns, isOpen, isEstimate } = getOpenStats(resort.trails, weather)
   const avgRating =
     reviews.length > 0
       ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
@@ -187,12 +187,22 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
             <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-white/30">Condition</p>
-                <p className="mt-0.5 text-sm font-semibold text-white">{weather.condition}</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">
+                  {weather.overallCondition ?? weather.condition}
+                </p>
+                {weather.overallCondition && (
+                  <p className="text-[10px] text-white/30">{weather.condition}</p>
+                )}
               </div>
               <div className="h-8 w-px bg-white/10" />
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-white/30">Temperature</p>
-                <p className="mt-0.5 text-sm font-semibold text-white">{weather.tempF}°F</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">
+                  {weather.tempF}°F
+                  <span className="ml-1.5 text-xs font-normal text-white/40">
+                    feels {weather.feelsLikeF}°
+                  </span>
+                </p>
               </div>
               <div className="h-8 w-px bg-white/10" />
               <div>
@@ -210,19 +220,139 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
               </div>
               <div className="h-8 w-px bg-white/10" />
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/30">Wind</p>
-                <p className="mt-0.5 text-sm font-semibold text-white">{weather.windMph} mph</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/30">48h Snow</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">
+                  {weather.snowfall48hIn > 0 ? `${weather.snowfall48hIn}"` : "—"}
+                </p>
               </div>
               <div className="h-8 w-px bg-white/10" />
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-white/30">Trails Open</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/30">72h Snow</p>
                 <p className="mt-0.5 text-sm font-semibold text-white">
-                  {openRuns} / {resort.trails}
+                  {weather.snowfall72hIn > 0 ? `${weather.snowfall72hIn}"` : "—"}
+                </p>
+              </div>
+              <div className="h-8 w-px bg-white/10" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/30">Wind</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">
+                  {weather.windMph} mph
+                  <span className="ml-1.5 text-xs font-normal text-white/40">
+                    gusts {weather.windGustsMph}
+                  </span>
+                </p>
+              </div>
+              <div className="h-8 w-px bg-white/10" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/30">Runs Open</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">
+                  {openRuns} / {weather.runsTotal ?? resort.trails}
+                  {isEstimate && (
+                    <span className="ml-1.5 text-[10px] font-normal text-white/25">est.</span>
+                  )}
+                </p>
+              </div>
+              <div className="h-8 w-px bg-white/10" />
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-white/30">Lifts Open</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">
+                  {weather.liftsOpen !== null
+                    ? `${weather.liftsOpen} / ${weather.liftsTotal ?? resort.totalLifts}`
+                    : '—'}
                 </p>
               </div>
               <div className="ml-auto hidden text-xs text-white/20 sm:block">
                 Updated {weather.updatedAt}
               </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Mountain Snow Depths ── */}
+      {weather && (weather.snowDepthTopFt !== null || weather.snowDepthMidFt !== null) && (
+        <section className="border-b border-white/10 bg-navy-light/30">
+          <div className="mx-auto max-w-7xl px-6 py-4 lg:px-10">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+              <p className="text-[10px] uppercase tracking-widest text-white/25">Snow Depth by Elevation</p>
+              {weather.snowDepthTopFt !== null && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wide text-white/30">Summit</span>
+                  <span className="text-sm font-semibold text-white">{weather.snowDepthTopFt} ft</span>
+                </div>
+              )}
+              {weather.snowDepthMidFt !== null && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wide text-white/30">Mid</span>
+                  <span className="text-sm font-semibold text-white">{weather.snowDepthMidFt} ft</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase tracking-wide text-white/30">Base</span>
+                <span className="text-sm font-semibold text-white">
+                  {weather.snowDepthFt > 0 ? `${weather.snowDepthFt} ft` : '—'}
+                </span>
+              </div>
+              {weather.overallCondition && (
+                <span className="rounded-full bg-sky-500/15 px-3 py-0.5 text-xs font-semibold text-sky-300 ring-1 ring-sky-500/25">
+                  {weather.overallCondition}
+                </span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 7-Day Snowfall Outlook ── */}
+      {weather && weather.forecast.length > 0 && (
+        <section className="border-b border-white/10 bg-navy-light/50">
+          <div className="mx-auto max-w-7xl px-6 py-6 lg:px-10">
+            <div className="mb-4 flex items-baseline justify-between gap-4">
+              <p className="text-[10px] uppercase tracking-widest text-white/30">7-Day Snowfall Outlook</p>
+              {weather.snowfall7dIn > 0 && (
+                <span className="text-xs text-sky-400">
+                  {weather.snowfall7dIn}" forecast total
+                </span>
+              )}
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {weather.forecast.map((day) => {
+                const label = new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'numeric',
+                  day: 'numeric'
+                })
+                const hasSnow = day.snowfallIn > 0
+                return (
+                  <div
+                    key={day.date}
+                    className={`flex min-w-[90px] shrink-0 flex-col items-center gap-1.5 rounded-2xl px-3 py-3.5 text-center ring-1 transition ${
+                      hasSnow
+                        ? 'bg-sky-500/10 ring-sky-500/25'
+                        : 'bg-white/5 ring-white/8'
+                    }`}
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-white/40">
+                      {label}
+                    </p>
+                    {hasSnow ? (
+                      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-sky-400" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v20M12 2l-3 3m3-3l3 3M12 22l-3-3m3 3l3-3M2 12h20M2 12l3-3m-3 3l3 3M22 12l-3-3m3 3l-3 3M5.636 5.636l12.728 12.728M5.636 5.636l1.06 4.243m-1.06-4.243l4.243 1.06M18.364 18.364l-1.06-4.243m1.06 4.243l-4.243-1.06M18.364 5.636L5.636 18.364M18.364 5.636l-4.243 1.06m4.243-1.06l-1.06 4.243M5.636 18.364l4.243-1.06m-4.243 1.06l1.06-4.243" />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white/20" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeLinecap="round" />
+                      </svg>
+                    )}
+                    <p className={`text-xs font-bold ${hasSnow ? 'text-sky-300' : 'text-white/25'}`}>
+                      {hasSnow ? `${day.snowfallIn}"` : '—'}
+                    </p>
+                    <p className="text-[10px] text-white/30 leading-tight">{day.condition}</p>
+                    <p className="text-[10px] text-white/40">{day.highF}° / {day.lowF}°</p>
+                  </div>
+                )
+              })}
             </div>
           </div>
         </section>
@@ -246,8 +376,18 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
               <h2 className="mb-5 text-2xl font-bold text-white">Mountain Stats</h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
-                  { label: "Total Trails", value: resort.trails.toString() },
-                  { label: "Total Lifts", value: resort.totalLifts.toString() },
+                  {
+                    label: weather && !isEstimate ? "Runs Open" : "Total Runs",
+                    value: weather && !isEstimate
+                      ? `${openRuns} / ${weather.runsTotal ?? resort.trails}`
+                      : resort.trails.toString(),
+                  },
+                  {
+                    label: weather?.liftsOpen != null ? "Lifts Open" : "Total Lifts",
+                    value: weather?.liftsOpen != null
+                      ? `${weather.liftsOpen} / ${weather.liftsTotal ?? resort.totalLifts}`
+                      : resort.totalLifts.toString(),
+                  },
                   { label: "Vertical Drop", value: resort.vertical },
                   { label: "Avg Ticket", value: `$${resort.avgTicketPrice}` },
                 ].map((stat) => (
@@ -386,8 +526,8 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
                 {[
                   { label: "Region", value: resort.region },
                   { label: "State", value: resort.state },
-                  { label: "Total Trails", value: resort.trails.toString() },
-                  { label: "Total Lifts", value: resort.totalLifts.toString() },
+                  { label: "Total Trails", value: (weather?.runsTotal ?? resort.trails).toString() },
+                  { label: "Total Lifts", value: (weather?.liftsTotal ?? resort.totalLifts).toString() },
                   { label: "Vertical Drop", value: resort.vertical },
                 ].map((fact) => (
                   <div key={fact.label} className="flex items-center justify-between">

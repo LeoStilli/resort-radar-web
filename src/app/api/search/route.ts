@@ -16,7 +16,7 @@ const SYSTEM_PROMPT = `You are a filter parser for a ski resort search engine. G
 Available values:
 - state: "CO", "WY", "UT", "CA", "MT", "VT" or null
 - passFilter: "epic", "ikon", "mountain-collective" or null
-- sort: "rating", "snow", "price-asc", "price-desc" or null
+- sort: "rating", "snow", "lifts", "price-asc", "price-desc" or null
 - maxPrice: number (max daily lift ticket price in USD) or null
 - difficulty: "beginner", "intermediate", "advanced", "expert" or null
 - explanation: short human-readable summary of what you extracted (max 60 chars)
@@ -35,6 +35,7 @@ Difficulty mapping:
 Sort mapping:
 - "best rated", "top rated", "highest rated" → "rating"
 - "most snow", "best powder", "powder day", "fresh snow", "best conditions" → "snow"
+- "most lifts open", "most open", "most runs open", "best access", "most terrain open" → "lifts"
 - "cheapest", "budget", "affordable", "lowest price", "under $X" → "price-asc"
 - "expensive", "luxury", "premium" → "price-desc"
 

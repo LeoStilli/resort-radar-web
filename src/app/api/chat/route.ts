@@ -30,15 +30,24 @@ export async function POST(req: Request) {
       const coverageInfo = userCoverage.length > 0
         ? ` USER CAN VISIT FREE with their ${userCoverage.map((p) => `${p.passName} (${p.access})`).join(" / ")}.`
         : "";
-      if (!w) return `${r.name} (${r.location}): data unavailable.${passInfo}${coverageInfo}`;
+      if (!w) return `${r.name} (${r.location}): data unavailable.${passInfo}${coverageInfo}`
+      const snowSummary =
+        w.snowfall72hIn > 0
+          ? `${w.snowfallTodayIn}" today / ${w.snowfall48hIn}" 48h / ${w.snowfall72hIn}" 72h`
+          : `${w.snowfallTodayIn}" new today`
+      const forecastSnow = w.snowfall7dIn > 0 ? ` ${w.snowfall7dIn}" more forecast next 7 days.` : ''
+      const liftStatus = w.liftsOpen !== null
+        ? ` ${w.liftsOpen}/${w.liftsTotal ?? r.totalLifts} lifts open, ${w.runsOpen ?? '?'}/${w.runsTotal ?? r.trails} runs open.`
+        : ''
+      const overallCond = w.overallCondition ? ` Overall: ${w.overallCondition}.` : ''
       return (
         `${r.name} (${r.location}): ${w.condition}, ` +
-        `${w.tempF}°F, snow depth ${w.snowDepthFt} ft, ` +
-        `${w.snowfallTodayIn}" new snow today, wind ${w.windMph} mph. ` +
-        `${r.trails} trails, ${r.vertical} vertical. ` +
+        `${w.tempF}°F (feels ${w.feelsLikeF}°F), snow depth ${w.snowDepthFt} ft, ` +
+        `${snowSummary}, wind ${w.windMph} mph (gusts ${w.windGustsMph} mph).${forecastSnow}${liftStatus}${overallCond} ` +
+        `${r.trails} total trails, ${r.vertical} vertical. ` +
         `Difficulty: ${r.difficulty.green}% green / ${r.difficulty.blue}% blue / ${r.difficulty.black}% black. ` +
-        `Terrain: ${r.terrain.join(", ")}.${passInfo}${coverageInfo}`
-      );
+        `Terrain: ${r.terrain.join(', ')}.${passInfo}${coverageInfo}`
+      )
     })
     .join("\n");
 

@@ -1,11 +1,35 @@
+export interface DailyForecast {
+  date: string
+  weatherCode: number
+  condition: string
+  snowfallIn: number
+  highF: number
+  lowF: number
+  windMph: number
+}
+
 export interface ResortWeather {
-  tempF: number;
-  snowDepthFt: number;
-  snowfallTodayIn: number;
-  windMph: number;
-  weatherCode: number;
-  condition: string;
-  updatedAt: string;
+  tempF: number
+  feelsLikeF: number
+  snowDepthFt: number
+  snowfallTodayIn: number
+  snowfall48hIn: number
+  snowfall72hIn: number
+  snowfall7dIn: number
+  windMph: number
+  windGustsMph: number
+  weatherCode: number
+  condition: string
+  forecast: DailyForecast[]
+  // Live ski data — null when WWO_API_KEY is not configured
+  liftsOpen: number | null
+  liftsTotal: number | null
+  runsOpen: number | null
+  runsTotal: number | null
+  snowDepthTopFt: number | null
+  snowDepthMidFt: number | null
+  overallCondition: string | null
+  updatedAt: string
 }
 
 export interface Hotel {
@@ -276,12 +300,198 @@ export const RESORTS: Resort[] = [
     hotels: [
       { name: "The Grand Killington", stars: 4, pricePerNight: 380, distanceMiles: 0.5, amenities: ["Ski Shuttle", "Spa", "Indoor Pool", "Restaurant"] },
       { name: "Killington Mountain Lodge", stars: 4, pricePerNight: 320, distanceMiles: 0.2, amenities: ["Slope Access", "Bar & Grill", "Hot Tub", "Ski Storage"] },
-      { name: "Sunrise Village Condominiums", stars: 3, pricePerNight: 180, distanceMiles: 0.8, amenities: ["Full Kitchen", "Free Shuttle", "Indoor Pool", "Fireplace"] },
+      { name: "Sunrise Village Condominiums", stars: 3, pricePerNight: 180, distanceMiles: 0.8, amenities: ["Full Kitchen", "Free Shuttle", "Indoor Pool", "Fireplace"] }
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true }
+    ]
+  },
+  {
+    id: "snowbird",
+    name: "Snowbird",
+    location: "Little Cottonwood Canyon, UT",
+    state: "UT",
+    country: "USA",
+    region: "Wasatch Range",
+    image: "https://images.unsplash.com/photo-1548777123-e216912df7d8?w=800&q=80",
+    lat: 40.5829, lon: -111.6553,
+    trails: 169, totalLifts: 14, vertical: "3,240 ft",
+    difficulty: { green: 27, blue: 38, black: 35 },
+    terrain: ["Powder bowls", "Steeps", "Glades", "Mineral Basin", "Groomers"],
+    rating: 4.7, priceLevel: 3, avgTicketPrice: 199,
+    description: "Snowbird sits at the top of Little Cottonwood Canyon, one of the most reliably snowy corridors in Utah, receiving an average of 500 inches of light Wasatch powder each season. The resort's aerial tram whisks 125 riders at a time to the 11,000-foot Hidden Peak, opening access to expansive bowl skiing on both the front and back sides of the mountain. Snowbird's reputation for expert-level terrain is well-earned, but the resort's breadth — from beginner runs to double-black couloirs — makes it one of the most complete ski resorts in the country.",
+    hotels: [
+      { name: "The Cliff Lodge & Spa", stars: 4, pricePerNight: 420, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Rooftop Pool", "Full Spa", "Multiple Restaurants"] },
+      { name: "The Lodge at Snowbird", stars: 3, pricePerNight: 260, distanceMiles: 0.2, amenities: ["Tram Access", "Outdoor Pool", "Mountain Views", "Ski Storage"] },
+      { name: "The Inn at Snowbird", stars: 3, pricePerNight: 200, distanceMiles: 0.4, amenities: ["Hot Tub", "Free Shuttle", "Kitchen Suites", "Budget-Friendly"] }
     ],
     passes: [
       { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true },
-    ],
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false }
+    ]
   },
+  {
+    id: "alta",
+    name: "Alta",
+    location: "Alta, UT",
+    state: "UT",
+    country: "USA",
+    region: "Wasatch Range",
+    image: "https://images.unsplash.com/photo-1518377373066-3acfcea3eb4b?w=800&q=80",
+    lat: 40.5882, lon: -111.6378,
+    trails: 119, totalLifts: 11, vertical: "2,538 ft",
+    difficulty: { green: 25, blue: 40, black: 35 },
+    terrain: ["Powder bowls", "Glades", "Chutes", "Groomers", "Cirques"],
+    rating: 4.8, priceLevel: 3, avgTicketPrice: 159,
+    description: "Alta is one of only three ski-only resorts remaining in the United States, a distinction that perfectly captures its identity as a pure, unapologetically old-school ski mountain. Sitting adjacent to Snowbird in the same canyon, Alta receives the same legendary Wasatch powder but channels it through a more intimate, unhurried atmosphere built for people who came to ski above everything else. The resort's interconnect with Snowbird via Mineral Basin creates one of the greatest powder ski experiences in North America on a fresh snow day.",
+    hotels: [
+      { name: "Alta Lodge", stars: 4, pricePerNight: 480, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Classic Lodge Feel", "Family Style Dining", "Hot Tub"] },
+      { name: "Rustler Lodge", stars: 4, pricePerNight: 380, distanceMiles: 0.2, amenities: ["Heated Outdoor Pool", "Fine Dining", "Ski Valet", "Mountain Views"] },
+      { name: "Goldminer's Daughter Lodge", stars: 3, pricePerNight: 220, distanceMiles: 0.3, amenities: ["Slope Access", "Cozy Rooms", "Restaurant", "Après-Ski Bar"] }
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true }
+    ]
+  },
+  {
+    id: "stowe",
+    name: "Stowe",
+    location: "Stowe, VT",
+    state: "VT",
+    country: "USA",
+    region: "New England",
+    image: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&q=80",
+    lat: 44.5309, lon: -72.7814,
+    trails: 116, totalLifts: 13, vertical: "2,360 ft",
+    difficulty: { green: 16, blue: 59, black: 25 },
+    terrain: ["Groomers", "Glades", "Front Four", "Spruce Peak", "Snowmaking"],
+    rating: 4.6, priceLevel: 3, avgTicketPrice: 149,
+    description: "Stowe is arguably the most iconic ski resort in New England — a quintessential Vermont village at the foot of Mount Mansfield, the state's highest peak. The storied Front Four — National, Liftline, Goat, and Starr — represent some of the most respected steep terrain in the East, while the broader mountain offers exceptional groomed cruisers for all ability levels. Since its acquisition by Vail Resorts, Stowe has received significant capital investment, adding the Spruce Peak village and modern lift infrastructure while preserving the classic New England character that made it famous.",
+    hotels: [
+      { name: "Stowe Mountain Lodge", stars: 5, pricePerNight: 680, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Full Spa", "Heated Pool", "Farm-to-Table Dining"] },
+      { name: "Spruce Peak Hotel", stars: 4, pricePerNight: 420, distanceMiles: 0.2, amenities: ["Village Location", "Gondola Access", "Fitness Center", "Restaurants"] },
+      { name: "Trapp Family Lodge", stars: 4, pricePerNight: 300, distanceMiles: 2.0, amenities: ["Nordic Skiing", "Mountain Views", "Austrian-Style", "Cross-Country Trails"] }
+    ],
+    passes: [
+      { passId: "epic", passName: "Epic Pass", access: "Unlimited", blackouts: false }
+    ]
+  },
+  {
+    id: "palisades-tahoe",
+    name: "Palisades Tahoe",
+    location: "Olympic Valley, CA",
+    state: "CA",
+    country: "USA",
+    region: "Sierra Nevada",
+    image: "https://images.unsplash.com/photo-1574484284002-952d92456975?w=800&q=80",
+    lat: 39.1968, lon: -120.2357,
+    trails: 270, totalLifts: 42, vertical: "2,850 ft",
+    difficulty: { green: 25, blue: 45, black: 30 },
+    terrain: ["KT-22", "Headwall", "Terrain parks", "Alpine Meadows", "Powder bowls"],
+    rating: 4.6, priceLevel: 3, avgTicketPrice: 179,
+    description: "Palisades Tahoe — the combined resort formerly known as Squaw Valley and Alpine Meadows — is one of the largest ski areas in California, hosting the 1960 Winter Olympics and shaping several generations of freestyle skiing culture. The interconnected mountain spans two distinct base areas linked by a gondola, offering a remarkable variety of terrain from the technical KT-22 chair and its wall-to-wall expert lines to the broad, playful alpine meadows of the adjacent Alpine side. Lake Tahoe's intense winter storms deliver some of the most frequent and deep Sierra snowfall of any resort in the region.",
+    hotels: [
+      { name: "The Village at Palisades Tahoe", stars: 4, pricePerNight: 480, distanceMiles: 0.1, amenities: ["Slope Access", "Village Restaurants", "Hot Tubs", "Ski Storage"] },
+      { name: "PlumpJack Inn", stars: 4, pricePerNight: 380, distanceMiles: 0.2, amenities: ["Boutique Style", "Fireplaces", "Fine Dining", "Mountain Views"] },
+      { name: "Resort at Squaw Creek", stars: 4, pricePerNight: 340, distanceMiles: 0.5, amenities: ["Ski-in/Ski-out", "Golf Course", "Spa", "Multiple Pools"] }
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "Unlimited", blackouts: false }
+    ]
+  },
+  {
+    id: "sun-valley",
+    name: "Sun Valley",
+    location: "Sun Valley, ID",
+    state: "ID",
+    country: "USA",
+    region: "Northern Rockies",
+    image: "https://images.unsplash.com/photo-1547734472-1f406a17ed2f?w=800&q=80",
+    lat: 43.6962, lon: -114.3503,
+    trails: 121, totalLifts: 19, vertical: "3,400 ft",
+    difficulty: { green: 36, blue: 42, black: 22 },
+    terrain: ["Bald Mountain", "Seattle Ridge", "Groomers", "Glades", "Exhibition"],
+    rating: 4.6, priceLevel: 4, avgTicketPrice: 209,
+    description: "Sun Valley holds the distinction of being America's first destination ski resort, opening in 1936 and inventing the concept of the purpose-built ski lodge. Bald Mountain — universally called 'Baldy' — rises 9,150 feet with a consistent pitch and impeccably groomed runs that make it a favorite among expert skiers who prize technique and speed. The resort's relatively low snowfall is offset by exceptional snowmaking and a culture of precision grooming that keeps Baldy in perfect condition throughout the season. The surrounding town of Ketchum is one of the great ski towns in America.",
+    hotels: [
+      { name: "Sun Valley Lodge", stars: 5, pricePerNight: 750, distanceMiles: 0.5, amenities: ["Historic Landmark", "Outdoor Ice Rink", "Full Spa", "Multiple Pools"] },
+      { name: "Sun Valley Inn", stars: 4, pricePerNight: 360, distanceMiles: 0.5, amenities: ["Shuttle to Slopes", "Indoor Pool", "Tennis", "Family-Friendly"] },
+      { name: "Knob Hill Inn", stars: 4, pricePerNight: 320, distanceMiles: 1.0, amenities: ["Boutique Hotel", "Heated Pool", "European Style", "Concierge"] }
+    ],
+    passes: [
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false }
+    ]
+  },
+  {
+    id: "taos",
+    name: "Taos Ski Valley",
+    location: "Taos, NM",
+    state: "NM",
+    country: "USA",
+    region: "Rocky Mountains",
+    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+    lat: 36.595, lon: -105.4536,
+    trails: 110, totalLifts: 15, vertical: "2,612 ft",
+    difficulty: { green: 24, blue: 25, black: 51 },
+    terrain: ["Hike-to terrain", "Steeps", "Glades", "Chutes", "Moguls"],
+    rating: 4.7, priceLevel: 3, avgTicketPrice: 169,
+    description: "Taos Ski Valley is the most underrated expert ski resort in America — a cult destination tucked into the Sangre de Cristo Mountains of northern New Mexico that rewards those willing to make the journey. Over half its terrain is classified black or double-black, with legendary steep shots like Stauffenberg, Al's Run, and Reforma dropping directly from the ridge in full view of the base lodge. The resort's intimate scale, minimal crowds, and remarkably dry, high-altitude snow create an experience that regulars describe as the closest thing to a hidden gem left in American skiing.",
+    hotels: [
+      { name: "The Blake at Taos Ski Valley", stars: 4, pricePerNight: 380, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Full Spa", "Heated Pool", "Farm-to-Table Restaurant"] },
+      { name: "Edelweiss Lodge & Spa", stars: 4, pricePerNight: 300, distanceMiles: 0.2, amenities: ["European Alpine Style", "Hot Tubs", "Spa Services", "Mountain Views"] },
+      { name: "Austing Haus Hotel", stars: 3, pricePerNight: 190, distanceMiles: 1.5, amenities: ["Classic Lodge", "Hot Tub", "Shuttle", "Family Suites"] }
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true },
+      { passId: "mountain-collective", passName: "Mountain Collective", access: "2 days", blackouts: false }
+    ]
+  },
+  {
+    id: "crested-butte",
+    name: "Crested Butte",
+    location: "Mt. Crested Butte, CO",
+    state: "CO",
+    country: "USA",
+    region: "Rocky Mountains",
+    image: "https://images.unsplash.com/photo-1604537466573-5e94508fd243?w=800&q=80",
+    lat: 38.8978, lon: -106.9625,
+    trails: 131, totalLifts: 16, vertical: "2,775 ft",
+    difficulty: { green: 13, blue: 29, black: 58 },
+    terrain: ["Extreme terrain", "Steeps", "Glades", "Snowcat skiing", "Moguls"],
+    rating: 4.6, priceLevel: 3, avgTicketPrice: 149,
+    description: "Crested Butte is Colorado's mountain for skiers who have outgrown everywhere else. The resort's extreme terrain zone — accessed via the North Face — is the most concentrated collection of legitimate double-black expert runs in Colorado, featuring pitches that regularly exceed 50 degrees. Beyond the expert terrain, the rest of the mountain is a well-rounded mix of groomers and gladed runs served by a modern lift network. The nearby Victorian mining town of Crested Butte, largely unchanged for decades, is one of the most authentic and charming ski towns in the American West.",
+    hotels: [
+      { name: "Elevation Hotel & Spa", stars: 4, pricePerNight: 420, distanceMiles: 0.1, amenities: ["Ski-in/Ski-out", "Full Spa", "Rooftop Hot Tubs", "Mountain Restaurant"] },
+      { name: "Grand Lodge Crested Butte", stars: 3, pricePerNight: 260, distanceMiles: 0.3, amenities: ["Indoor Pool", "Hot Tubs", "Fitness Center", "Ski Storage"] },
+      { name: "Cristiana Guesthaus", stars: 3, pricePerNight: 180, distanceMiles: 1.0, amenities: ["Historic B&B", "Hot Tub", "Breakfast Included", "Town Location"] }
+    ],
+    passes: [
+      { passId: "ikon", passName: "Ikon Pass", access: "7 days", blackouts: true }
+    ]
+  },
+  {
+    id: "keystone",
+    name: "Keystone",
+    location: "Keystone, CO",
+    state: "CO",
+    country: "USA",
+    region: "Rocky Mountains",
+    image: "https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=800&q=80",
+    lat: 39.6058, lon: -105.9378,
+    trails: 135, totalLifts: 20, vertical: "3,128 ft",
+    difficulty: { green: 12, blue: 33, black: 55 },
+    terrain: ["Night skiing", "Terrain parks", "Bowls", "Groomers", "Trees"],
+    rating: 4.2, priceLevel: 2, avgTicketPrice: 109,
+    description: "Keystone is one of Colorado's most family-friendly and accessible ski resorts, offering the state's most extensive night skiing operation across North Peak and the River Run area. Three distinct mountain faces — Keystone Mountain, North Peak, and Outback — provide a natural progression from wide groomed beginner terrain to challenging bowl skiing, all connected by a well-designed lift network. Its proximity to Denver along I-70, inclusion on the Epic Pass, and comparatively reasonable ticket prices make Keystone one of the most popular entry points into Summit County skiing.",
+    hotels: [
+      { name: "Keystone Lodge & Spa", stars: 4, pricePerNight: 340, distanceMiles: 0.3, amenities: ["Lakeside Setting", "Spa", "Heated Pool", "Multiple Restaurants"] },
+      { name: "River Run Condominiums", stars: 3, pricePerNight: 240, distanceMiles: 0.1, amenities: ["Gondola Access", "Full Kitchen", "Hot Tub", "Village Location"] },
+      { name: "Ski Tip Lodge", stars: 3, pricePerNight: 200, distanceMiles: 1.0, amenities: ["Historic B&B", "Gourmet Breakfast", "Fireplaces", "Nordic Trails"] }
+    ],
+    passes: [
+      { passId: "epic", passName: "Epic Pass", access: "Unlimited", blackouts: false }
+    ]
+  }
 ];
 
 const WMO: Record<number, string> = {
@@ -305,17 +515,64 @@ function wmoToCondition(code: number, snowDepth: number): string {
 export function getOpenStats(
   totalTrails: number,
   weather: ResortWeather | null
-): { openRuns: number; isOpen: boolean } {
-  if (!weather) return { openRuns: 0, isOpen: false };
-  const d = weather.snowDepthFt;
-  let pct = 0;
-  if (d > 3) pct = 0.95;
-  else if (d > 2) pct = 0.85;
-  else if (d > 1) pct = 0.65;
-  else if (d > 0.3) pct = 0.35;
-  else if (d > 0) pct = 0.15;
-  const openRuns = Math.round(totalTrails * pct);
-  return { openRuns, isOpen: openRuns > 0 };
+): { openRuns: number; isOpen: boolean; isEstimate: boolean } {
+  if (!weather) return { openRuns: 0, isOpen: false, isEstimate: false }
+  if (weather.runsOpen !== null) {
+    return { openRuns: weather.runsOpen, isOpen: weather.runsOpen > 0, isEstimate: false }
+  }
+  // Fall back to snow-depth estimate when live data unavailable
+  const d = weather.snowDepthFt
+  let pct = 0
+  if (d > 3) pct = 0.95
+  else if (d > 2) pct = 0.85
+  else if (d > 1) pct = 0.65
+  else if (d > 0.3) pct = 0.35
+  else if (d > 0) pct = 0.15
+  return { openRuns: Math.round(totalTrails * pct), isOpen: pct > 0, isEstimate: true }
+}
+
+const PAST_DAYS = 3
+
+interface WwoSkiData {
+  liftsOpen: number | null
+  liftsTotal: number | null
+  runsOpen: number | null
+  runsTotal: number | null
+  snowDepthTopFt: number | null
+  snowDepthMidFt: number | null
+  overallCondition: string | null
+}
+
+async function fetchWWOSkiData(lat: number, lon: number): Promise<WwoSkiData | null> {
+  const key = process.env.WWO_API_KEY
+  if (!key) return null
+  try {
+    const url =
+      `https://api.worldweatheronline.com/premium/v1/ski.ashx` +
+      `?key=${key}&q=${lat},${lon}&format=json&num_of_days=1`
+    const res = await fetch(url, { next: { revalidate: 1800 } })
+    if (!res.ok) return null
+    const data = await res.json()
+    const w = data?.data?.weather?.[0]
+    if (!w) return null
+    const num = (v: unknown): number | null => {
+      const n = parseFloat(String(v ?? ''))
+      return isNaN(n) ? null : n
+    }
+    const cmToFt = (cm: number | null): number | null =>
+      cm !== null ? Math.round(cm * 0.0328084 * 10) / 10 : null
+    return {
+      liftsOpen: num(w.lifts_open),
+      liftsTotal: num(w.lifts_total),
+      runsOpen: num(w.runs_open),
+      runsTotal: num(w.runs_total),
+      snowDepthTopFt: cmToFt(num(w.top_snowDepth_cm)),
+      snowDepthMidFt: cmToFt(num(w.mid_snowDepth_cm)),
+      overallCondition: typeof w.Overall_condition === 'string' && w.Overall_condition ? w.Overall_condition : null
+    }
+  } catch {
+    return null
+  }
 }
 
 export async function fetchResortWeather(
@@ -323,29 +580,69 @@ export async function fetchResortWeather(
   lon: number
 ): Promise<ResortWeather | null> {
   try {
-    const url =
+    const openMeteoUrl =
       `https://api.open-meteo.com/v1/forecast` +
       `?latitude=${lat}&longitude=${lon}` +
-      `&current=temperature_2m,snowfall,snow_depth,weather_code,wind_speed_10m` +
-      `&daily=snowfall_sum,snow_depth_max` +
+      `&current=temperature_2m,apparent_temperature,snowfall,snow_depth,weather_code,wind_speed_10m,wind_gusts_10m` +
+      `&daily=snowfall_sum,snow_depth_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,weather_code` +
       `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch` +
-      `&timezone=auto&forecast_days=1`;
-    const res = await fetch(url, { next: { revalidate: 900 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const c = data.current;
-    const d = data.daily;
+      `&timezone=auto&forecast_days=8&past_days=${PAST_DAYS}`
+
+    const [res, skiData] = await Promise.all([
+      fetch(openMeteoUrl, { next: { revalidate: 900 } }),
+      fetchWWOSkiData(lat, lon)
+    ])
+    if (!res.ok) return null
+    const data = await res.json()
+    const c = data.current
+    const d = data.daily
+    const ti = PAST_DAYS
+
+    const s = (i: number) => d.snowfall_sum?.[i] ?? 0
+    const snowfall48h = Math.round((s(ti) + s(ti - 1)) * 10) / 10
+    const snowfall72h = Math.round((s(ti) + s(ti - 1) + s(ti - 2)) * 10) / 10
+    const snowfall7d = Math.round(
+      (d.snowfall_sum?.slice(ti + 1) ?? []).reduce((a: number, b: number) => a + b, 0) * 10
+    ) / 10
+
+    const forecast: DailyForecast[] = Array.from({ length: 7 }, (_, i) => {
+      const idx = ti + 1 + i
+      const code = d.weather_code?.[idx] ?? 0
+      return {
+        date: d.time?.[idx] ?? '',
+        weatherCode: code,
+        condition: WMO[code] ?? 'Clear Sky',
+        snowfallIn: Math.round((d.snowfall_sum?.[idx] ?? 0) * 10) / 10,
+        highF: Math.round(d.temperature_2m_max?.[idx] ?? 0),
+        lowF: Math.round(d.temperature_2m_min?.[idx] ?? 0),
+        windMph: Math.round(d.wind_speed_10m_max?.[idx] ?? 0)
+      }
+    })
+
     return {
       tempF: Math.round(c.temperature_2m),
+      feelsLikeF: Math.round(c.apparent_temperature),
       snowDepthFt: Math.round(c.snow_depth * 10) / 10,
-      snowfallTodayIn: Math.round((d.snowfall_sum?.[0] ?? 0) * 10) / 10,
+      snowfallTodayIn: Math.round(s(ti) * 10) / 10,
+      snowfall48hIn: snowfall48h,
+      snowfall72hIn: snowfall72h,
+      snowfall7dIn: snowfall7d,
       windMph: Math.round(c.wind_speed_10m),
+      windGustsMph: Math.round(c.wind_gusts_10m),
       weatherCode: c.weather_code,
       condition: wmoToCondition(c.weather_code, c.snow_depth),
-      updatedAt: c.time,
-    };
+      forecast,
+      liftsOpen: skiData?.liftsOpen ?? null,
+      liftsTotal: skiData?.liftsTotal ?? null,
+      runsOpen: skiData?.runsOpen ?? null,
+      runsTotal: skiData?.runsTotal ?? null,
+      snowDepthTopFt: skiData?.snowDepthTopFt ?? null,
+      snowDepthMidFt: skiData?.snowDepthMidFt ?? null,
+      overallCondition: skiData?.overallCondition ?? null,
+      updatedAt: c.time
+    }
   } catch {
-    return null;
+    return null
   }
 }
 

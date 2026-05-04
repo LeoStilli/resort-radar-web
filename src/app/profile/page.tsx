@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { verifySessionToken } from "@/lib/auth";
 import { findUserById } from "@/lib/users";
 import { getUserReviews } from "@/lib/reviews";
-import { RESORTS } from "@/lib/resorts";
+import { fetchAllResortWeather } from "@/lib/resorts";
 import { ALL_BADGES, computeEarnedBadgeIds, sortBadges, type BadgeTier } from "@/lib/badges";
 import { Nav } from "@/components/Nav";
 import { Chatbot } from "@/components/Chatbot";
@@ -69,7 +69,8 @@ export default async function ProfilePage() {
     .toUpperCase();
 
   const userReviews = getUserReviews(session.userId);
-  const likedResorts = RESORTS.filter((r) => (user.likedResorts ?? []).includes(r.id));
+  const allResorts = await fetchAllResortWeather()
+  const likedResorts = allResorts.filter((r) => (user.likedResorts ?? []).includes(r.id))
 
   const earnedIds = computeEarnedBadgeIds(user, userReviews.length);
   const allSorted = sortBadges(ALL_BADGES);
@@ -275,6 +276,32 @@ export default async function ProfilePage() {
                       <p className="text-xs text-white/50">{resort.location}</p>
                     </div>
                   </Link>
+                  {resort.weather && (
+                    <div className="grid grid-cols-4 divide-x divide-white/8 border-t border-white/8">
+                      <div className="px-1.5 py-2 text-center">
+                        <p className="text-[9px] uppercase tracking-wide text-white/30">Lifts</p>
+                        <p className="text-xs font-semibold text-white">
+                          {resort.weather.liftsOpen !== null ? `${resort.weather.liftsOpen}/${resort.weather.liftsTotal}` : '—'}
+                        </p>
+                      </div>
+                      <div className="px-1.5 py-2 text-center">
+                        <p className="text-[9px] uppercase tracking-wide text-white/30">New</p>
+                        <p className="text-xs font-semibold text-white">
+                          {resort.weather.snowfallTodayIn > 0 ? `${resort.weather.snowfallTodayIn}"` : '—'}
+                        </p>
+                      </div>
+                      <div className="px-1.5 py-2 text-center">
+                        <p className="text-[9px] uppercase tracking-wide text-white/30">Base</p>
+                        <p className="text-xs font-semibold text-white">
+                          {resort.weather.snowDepthFt > 0 ? `${resort.weather.snowDepthFt}ft` : '—'}
+                        </p>
+                      </div>
+                      <div className="px-1.5 py-2 text-center">
+                        <p className="text-[9px] uppercase tracking-wide text-white/30">Temp</p>
+                        <p className="text-xs font-semibold text-white">{resort.weather.tempF}°F</p>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between px-3 py-2.5">
                     <div className="flex items-center gap-1">
                       <svg viewBox="0 0 20 20" className="h-4 w-4 fill-rose-500">
@@ -310,7 +337,7 @@ export default async function ProfilePage() {
           {userReviews.length > 0 ? (
             <div className="space-y-4">
               {userReviews.map((review) => {
-                const resort = RESORTS.find((r) => r.id === review.resortId);
+                const resort = allResorts.find((r) => r.id === review.resortId)
                 return (
                   <div
                     key={review.id}

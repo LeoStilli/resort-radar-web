@@ -14,6 +14,7 @@ const STATES = ['All', 'CO', 'WY', 'UT', 'CA', 'MT', 'VT']
 const SORTS = [
   { value: 'rating', label: 'Top Rated' },
   { value: 'snow', label: 'Most Snow' },
+  { value: 'lifts', label: 'Most Lifts Open' },
   { value: 'price-asc', label: 'Price: Low → High' },
   { value: 'price-desc', label: 'Price: High → Low' },
 ]
@@ -94,8 +95,9 @@ interface ResortCardProps {
 
 function ResortCard({ resort, userPasses }: ResortCardProps) {
   const w = resort.weather
-  const { openRuns, isOpen } = getOpenStats(resort.trails, w ?? null)
-  const openPct = resort.trails > 0 ? (openRuns / resort.trails) * 100 : 0
+  const { openRuns, isOpen, isEstimate } = getOpenStats(resort.trails, w ?? null)
+  const total = w?.runsTotal ?? resort.trails
+  const openPct = total > 0 ? (openRuns / total) * 100 : 0
 
   const coveredPasses = resort.passes.filter((p) => userPasses.includes(p.passId))
   const allPasses = resort.passes
@@ -157,7 +159,8 @@ function ResortCard({ resort, userPasses }: ResortCardProps) {
         <div>
           <div className="mb-1.5 flex items-center justify-between text-xs">
             <span className="text-white/50">
-              {openRuns} / {resort.trails} trails open
+              {openRuns} / {total} runs open
+              {isEstimate && <span className="ml-1 text-white/25">(est.)</span>}
             </span>
             <span className={`font-semibold ${isOpen ? 'text-emerald-400' : 'text-red-400/70'}`}>
               {Math.round(openPct)}%
@@ -172,20 +175,26 @@ function ResortCard({ resort, userPasses }: ResortCardProps) {
         </div>
 
         {w ? (
-          <div className="grid grid-cols-3 divide-x divide-white/8 rounded-xl bg-white/5 py-2.5">
-            <div className="px-3 text-center">
+          <div className="grid grid-cols-4 divide-x divide-white/8 rounded-xl bg-white/5 py-2.5">
+            <div className="px-2 text-center">
+              <p className="text-[10px] uppercase tracking-wide text-white/30">Lifts</p>
+              <p className="mt-0.5 text-sm font-semibold text-white">
+                {w.liftsOpen !== null ? `${w.liftsOpen}/${w.liftsTotal ?? resort.totalLifts}` : '—'}
+              </p>
+            </div>
+            <div className="px-2 text-center">
               <p className="text-[10px] uppercase tracking-wide text-white/30">New</p>
               <p className="mt-0.5 text-sm font-semibold text-white">
                 {w.snowfallTodayIn > 0 ? `${w.snowfallTodayIn}"` : '—'}
               </p>
             </div>
-            <div className="px-3 text-center">
+            <div className="px-2 text-center">
               <p className="text-[10px] uppercase tracking-wide text-white/30">Base</p>
               <p className="mt-0.5 text-sm font-semibold text-white">
                 {w.snowDepthFt > 0 ? `${w.snowDepthFt}ft` : '—'}
               </p>
             </div>
-            <div className="px-3 text-center">
+            <div className="px-2 text-center">
               <p className="text-[10px] uppercase tracking-wide text-white/30">Temp</p>
               <p className="mt-0.5 text-sm font-semibold text-white">{w.tempF}°F</p>
             </div>
@@ -296,6 +305,7 @@ export function ResortSearch({ resorts, userPasses }: ResortSearchProps) {
     return [...result].sort((a, b) => {
       if (effectiveSort === 'rating') return b.rating - a.rating
       if (effectiveSort === 'snow') return (b.weather?.snowDepthFt ?? 0) - (a.weather?.snowDepthFt ?? 0)
+      if (effectiveSort === 'lifts') return (b.weather?.liftsOpen ?? -1) - (a.weather?.liftsOpen ?? -1)
       if (effectiveSort === 'price-asc') return a.avgTicketPrice - b.avgTicketPrice
       if (effectiveSort === 'price-desc') return b.avgTicketPrice - a.avgTicketPrice
       return 0
@@ -312,7 +322,7 @@ export function ResortSearch({ resorts, userPasses }: ResortSearchProps) {
             Find Your Mountain
           </h1>
           <p className="mt-3 text-white/50">
-            Live conditions · Ratings · Trail status · Ticket prices
+            Live lift status · Open runs · Snow depth · Ratings · Ticket prices
           </p>
 
           {/* AI-powered search bar */}

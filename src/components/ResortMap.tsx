@@ -18,6 +18,11 @@ export interface MapResort {
     snowDepthFt: number;
     snowfallTodayIn: number;
     condition: string;
+    overallCondition: string | null;
+    liftsOpen: number | null;
+    liftsTotal: number | null;
+    runsOpen: number | null;
+    runsTotal: number | null;
   } | null;
 }
 
@@ -82,14 +87,14 @@ function ResortMarker({ resort }: { resort: MapResort }) {
               <div style={{ display: "flex", gap: 12, marginBottom: 6 }}>
                 <div>
                   <p style={{ fontSize: 10, color: "#aaa" }}>Condition</p>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>{w.condition}</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>{w.overallCondition ?? w.condition}</p>
                 </div>
                 <div>
                   <p style={{ fontSize: 10, color: "#aaa" }}>Temp</p>
                   <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>{w.tempF}°F</p>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ display: "flex", gap: 12, marginBottom: 6 }}>
                 <div>
                   <p style={{ fontSize: 10, color: "#aaa" }}>Snow Depth</p>
                   <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>
@@ -103,13 +108,27 @@ function ResortMarker({ resort }: { resort: MapResort }) {
                   </p>
                 </div>
               </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <div>
+                  <p style={{ fontSize: 10, color: "#aaa" }}>Lifts Open</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>
+                    {w.liftsOpen !== null ? `${w.liftsOpen} / ${w.liftsTotal ?? "?"}` : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ fontSize: 10, color: "#aaa" }}>Runs Open</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>
+                    {w.runsOpen !== null ? `${w.runsOpen} / ${w.runsTotal ?? "?"}` : "—"}
+                  </p>
+                </div>
+              </div>
             </>
           ) : (
             <p style={{ fontSize: 12, color: "#aaa" }}>Conditions loading…</p>
           )}
           <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #f0f0f0", display: "flex", gap: 12 }}>
             <div>
-              <p style={{ fontSize: 10, color: "#aaa" }}>Trails</p>
+              <p style={{ fontSize: 10, color: "#aaa" }}>Total Runs</p>
               <p style={{ fontSize: 12, fontWeight: 600, color: "#0c1a2a" }}>{resort.trails}</p>
             </div>
             <div>
