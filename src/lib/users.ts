@@ -23,6 +23,9 @@ export interface User {
   followers?: string[];
   following?: string[];
   skiPasses?: string[];
+  emailVerified?: boolean;
+  verificationToken?: string;
+  verificationTokenExpiry?: string;
 }
 
 function readUsers(): User[] {
@@ -85,9 +88,13 @@ export async function createUser(
   return user;
 }
 
+export function findUserByVerificationToken(token: string): User | undefined {
+  return readUsers().find((u) => u.verificationToken === token);
+}
+
 export function updateUser(
   id: string,
-  updates: Partial<Pick<User, "name" | "bio" | "avatarUrl" | "coverUrl" | "slopesConnected" | "skillLevel" | "favoriteResorts" | "likedResorts" | "followers" | "following" | "skiPasses">>
+  updates: Partial<Pick<User, "name" | "bio" | "avatarUrl" | "coverUrl" | "slopesConnected" | "skillLevel" | "favoriteResorts" | "likedResorts" | "followers" | "following" | "skiPasses" | "emailVerified" | "verificationToken" | "verificationTokenExpiry">>
 ): User | undefined {
   const users = readUsers();
   const idx = users.findIndex((u) => u.id === id);

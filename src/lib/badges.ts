@@ -113,6 +113,14 @@ export const ALL_BADGES: Badge[] = [
     tier: "special",
     icon: "🔗",
   },
+  {
+    id: "email-verified",
+    name: "Verified Member",
+    description: "Confirmed your email address",
+    requirement: "Verify your email from your profile",
+    tier: "special",
+    icon: "✉️",
+  },
 ];
 
 const TIER_ORDER: BadgeTier[] = ["bronze", "silver", "gold", "special"];
@@ -134,6 +142,7 @@ export function computeEarnedBadgeIds(user: User, reviewCount: number): Set<stri
   if (user.skillLevel) earned.add("skill-set");
   if (user.avatarUrl && user.bio) earned.add("profile-complete");
   if (user.slopesConnected) earned.add("slopes-connected");
+  if (user.emailVerified) earned.add("email-verified");
 
   const likedDetails = RESORTS.filter((r) => liked.includes(r.id));
   const states = new Set(likedDetails.map((r) => r.state));

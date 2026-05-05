@@ -13,6 +13,7 @@ import { ProfileForm } from "./_components/ProfileForm";
 import { ShareButton } from "./_components/ShareButton";
 import { FollowStats, type FollowUser } from "./_components/FollowStats";
 import { FindPeople } from "./_components/FindPeople";
+import { VerificationHub } from "./_components/VerificationHub";
 
 export const metadata: Metadata = {
   title: "Your Profile — Resort Radar",
@@ -163,6 +164,17 @@ export default async function ProfilePage() {
               <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
                 {user.name}
               </h1>
+              {user.emailVerified && (
+                <span
+                  title="Verified member"
+                  className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400"
+                >
+                  <svg viewBox="0 0 12 12" fill="none" className="h-3 w-3">
+                    <path d="M2 6l2.5 2.5 5.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Verified
+                </span>
+              )}
               {user.skillLevel && (
                 <span className="rounded-full border border-gold/30 bg-gold/10 px-3 py-0.5 text-xs font-semibold text-gold">
                   {SKILL_LABELS[user.skillLevel] ?? user.skillLevel}
@@ -188,6 +200,18 @@ export default async function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* ── Verification & Account Status ── */}
+      <VerificationHub
+        email={user.email}
+        emailVerified={user.emailVerified ?? false}
+        hasBio={!!user.bio}
+        hasAvatar={!!user.avatarUrl}
+        hasSkillLevel={!!user.skillLevel}
+        hasSkiPass={(user.skiPasses ?? []).length > 0}
+        hasLikedResort={(user.likedResorts ?? []).length > 0}
+        skiPasses={user.skiPasses ?? []}
+      />
 
       {/* ── Badges ── */}
       <section className="border-b border-white/10 py-12">
