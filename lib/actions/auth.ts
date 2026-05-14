@@ -33,12 +33,12 @@ export async function login(
     const token = createSessionToken(user.id, user.email)
     const jar = await cookies()
     jar.set('session', token, SESSION_OPTS)
-
-    redirect('/')
   } catch (error) {
     console.error('Login error:', error)
     return { error: 'An error occurred during login. Please try again.' }
   }
+
+  redirect('/')
 }
 
 export async function signup(
@@ -61,12 +61,12 @@ export async function signup(
     const token = createSessionToken(user.id, user.email)
     const jar = await cookies()
     jar.set('session', token, SESSION_OPTS)
-
-    redirect('/')
   } catch (error) {
     console.error('Signup error:', error)
     return { error: 'An error occurred during signup. Please try again.' }
   }
+
+  redirect('/')
 }
 
 export async function logout(): Promise<void> {

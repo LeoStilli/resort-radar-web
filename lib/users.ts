@@ -62,7 +62,17 @@ async function readUsers(): Promise<User[]> {
   if (redis) {
     try {
       const users = await redis.get('users')
-      return users ? JSON.parse(users as string) : []
+      if (!users) return []
+
+      // Handle both JSON string and already-parsed object from Redis
+      if (typeof users === 'string') {
+        return JSON.parse(users)
+      } else if (Array.isArray(users)) {
+        return users as User[]
+      } else {
+        console.warn('Unexpected Redis data format:', typeof users)
+        return []
+      }
     } catch (error) {
       console.error('Redis error:', error)
       return []
