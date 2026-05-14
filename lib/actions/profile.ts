@@ -28,7 +28,7 @@ export async function updateProfile(
 
   if (!name) return { error: "Name is required." };
 
-  updateUser(session.userId, {
+  await updateUser(session.userId, {
     name,
     bio: bio || undefined,
     avatarUrl: avatarUrl || undefined,

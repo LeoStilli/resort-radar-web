@@ -11,10 +11,10 @@ export async function GET(req: Request) {
   const session = token ? verifySessionToken(token) : null
   if (!session) return Response.json([], { status: 401 })
 
-  const currentUser = findUserById(session.userId)
+  const currentUser = await findUserById(session.userId)
   const following = new Set(currentUser?.following ?? [])
 
-  const results = searchUsers(q, session.userId).map((u) => ({
+  const results = (await searchUsers(q, session.userId)).map((u) => ({
     ...u,
     isFollowing: following.has(u.id),
   }))

@@ -19,7 +19,7 @@ export async function requestEmailVerification(
   const session = rawToken ? verifySessionToken(rawToken) : null
   if (!session) redirect('/login')
 
-  const user = findUserById(session.userId)
+  const user = await findUserById(session.userId)
   if (!user) redirect('/login')
 
   if (user.emailVerified) return { error: 'Email is already verified.' }
@@ -29,7 +29,7 @@ export async function requestEmailVerification(
   const verificationToken = part1 + part2
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
-  updateUser(session.userId, {
+  await updateUser(session.userId, {
     verificationToken,
     verificationTokenExpiry: expiry
   })
@@ -43,7 +43,7 @@ export async function verifyEmailToken(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: 'No token provided.' }
 
-  const user = findUserByVerificationToken(token)
+  const user = await findUserByVerificationToken(token)
   if (!user) return { success: false, error: 'This link is invalid or has already been used.' }
 
   if (
@@ -56,7 +56,7 @@ export async function verifyEmailToken(
     }
   }
 
-  updateUser(user.id, {
+  await updateUser(user.id, {
     emailVerified: true,
     verificationToken: undefined,
     verificationTokenExpiry: undefined

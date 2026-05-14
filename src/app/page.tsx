@@ -104,7 +104,8 @@ export default async function HomePage() {
 
   const resorts = await fetchAllResortWeather();
 
-  const likedResortIds = user ? (findUserById(user.userId)?.likedResorts ?? []) : [];
+  const userDetails = user ? await findUserById(user.userId) : null;
+  const likedResortIds = userDetails?.likedResorts ?? [];
 
   const ticker = resorts.map((r) => ({
     resort: r.name.split(" ")[0],

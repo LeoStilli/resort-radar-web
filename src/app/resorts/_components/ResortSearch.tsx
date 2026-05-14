@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useState, useMemo, useRef } from 'react'
 import { getOpenStats } from '@/lib/resorts'
 import type { Resort, ResortWeather } from '@/lib/resorts'
-import type { SearchFilter } from '@/app/api/search/route'
+import type { SearchFilter } from '@/src/app/api/search/route'
 
 type ResortWithWeather = Resort & { weather: ResortWeather | null }
 

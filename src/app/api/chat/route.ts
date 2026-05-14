@@ -14,7 +14,7 @@ export async function POST(req: Request) {
   const jar = await cookies();
   const token = jar.get("session")?.value;
   const session = token ? verifySessionToken(token) : null;
-  const user = session ? findUserById(session.userId) : null;
+  const user = session ? await findUserById(session.userId) : null;
 
   const resorts = await fetchAllResortWeather();
 

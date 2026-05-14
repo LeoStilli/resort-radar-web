@@ -19,7 +19,7 @@ export async function submitReview(
   const session = token ? verifySessionToken(token) : null;
   if (!session) redirect("/login");
 
-  const user = findUserById(session.userId);
+  const user = await findUserById(session.userId);
   if (!user) redirect("/login");
 
   const rating = parseInt(formData.get("rating") as string, 10);

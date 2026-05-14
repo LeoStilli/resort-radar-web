@@ -47,14 +47,14 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
   const session = token ? verifySessionToken(token) : null;
 
   const reviews = getResortReviews(id);
-  const likeCount = getResortLikeCount(id);
+  const likeCount = await getResortLikeCount(id);
 
   let initialLiked = false;
   let userHasReviewed = false;
   let userPasses: string[] = [];
 
   if (session) {
-    const user = findUserById(session.userId);
+    const user = await findUserById(session.userId);
     initialLiked = user?.likedResorts?.includes(id) ?? false;
     userHasReviewed = hasUserReviewed(id, session.userId);
     userPasses = user?.skiPasses ?? [];

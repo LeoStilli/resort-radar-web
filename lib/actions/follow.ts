@@ -15,24 +15,24 @@ export async function toggleFollow(targetUserId: string): Promise<void> {
   const currentId = session.userId
   if (currentId === targetUserId) return
 
-  const current = findUserById(currentId)
-  const target = findUserById(targetUserId)
+  const current = await findUserById(currentId)
+  const target = await findUserById(targetUserId)
   if (!current || !target) return
 
   const alreadyFollowing = (current.following ?? []).includes(targetUserId)
 
   if (alreadyFollowing) {
-    updateUser(currentId, {
+    await updateUser(currentId, {
       following: (current.following ?? []).filter((id) => id !== targetUserId),
     })
-    updateUser(targetUserId, {
+    await updateUser(targetUserId, {
       followers: (target.followers ?? []).filter((id) => id !== currentId),
     })
   } else {
-    updateUser(currentId, {
+    await updateUser(currentId, {
       following: [...(current.following ?? []), targetUserId],
     })
-    updateUser(targetUserId, {
+    await updateUser(targetUserId, {
       followers: [...(target.followers ?? []), currentId],
     })
   }

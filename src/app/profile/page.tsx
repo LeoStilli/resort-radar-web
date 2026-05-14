@@ -59,7 +59,7 @@ export default async function ProfilePage() {
   const session = token ? verifySessionToken(token) : null;
   if (!session) redirect("/login");
 
-  const user = findUserById(session.userId);
+  const user = await findUserById(session.userId);
   if (!user) redirect("/login");
 
   const initials = user.name
@@ -78,19 +78,19 @@ export default async function ProfilePage() {
   const earnedBadges = allSorted.filter((b) => earnedIds.has(b.id));
   const lockedBadges = allSorted.filter((b) => !earnedIds.has(b.id));
 
-  const toFollowUser = (id: string): FollowUser | null => {
-    const u = findUserById(id);
+  const toFollowUser = async (id: string): Promise<FollowUser | null> => {
+    const u = await findUserById(id);
     if (!u) return null;
     return { id: u.id, name: u.name, avatarUrl: u.avatarUrl };
   };
 
-  const followerUsers: FollowUser[] = (user.followers ?? [])
-    .map(toFollowUser)
-    .filter((u): u is FollowUser => u !== null);
+  const followerUsers: FollowUser[] = (
+    await Promise.all((user.followers ?? []).map(toFollowUser))
+  ).filter((u): u is FollowUser => u !== null);
 
-  const followingUsers: FollowUser[] = (user.following ?? [])
-    .map(toFollowUser)
-    .filter((u): u is FollowUser => u !== null);
+  const followingUsers: FollowUser[] = (
+    await Promise.all((user.following ?? []).map(toFollowUser))
+  ).filter((u): u is FollowUser => u !== null);
 
   return (
     <main className="min-h-screen bg-navy">
