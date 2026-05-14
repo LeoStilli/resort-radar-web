@@ -1,12 +1,19 @@
 import { Redis } from '@upstash/redis'
 
 // Redis client setup with fallback for local development
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN
-    })
-  : null
+// Only create Redis client at runtime, not during build
+const getRedisClient = () => {
+  if (typeof window !== 'undefined') return null // Client-side
+  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV) {
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      return new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN
+      })
+    }
+  }
+  return null
+}
 
 // In-memory fallback for local development
 let memoryReviews: Review[] = [
@@ -32,6 +39,7 @@ export interface Review {
 }
 
 async function readReviews(): Promise<Review[]> {
+  const redis = getRedisClient()
   if (redis) {
     try {
       const reviews = await redis.get('reviews')
@@ -55,6 +63,7 @@ async function readReviews(): Promise<Review[]> {
 }
 
 async function writeReviews(reviews: Review[]): Promise<void> {
+  const redis = getRedisClient()
   if (redis) {
     try {
       await redis.set('reviews', JSON.stringify(reviews))

@@ -2,12 +2,19 @@ import { Redis } from '@upstash/redis'
 import { hashPassword } from './auth'
 
 // Redis client setup with fallback for local development
-const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-  ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN
-    })
-  : null
+// Only create Redis client at runtime, not during build
+const getRedisClient = () => {
+  if (typeof window !== 'undefined') return null // Client-side
+  if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV) {
+    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+      return new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN
+      })
+    }
+  }
+  return null
+}
 
 // In-memory fallback for local development
 let memoryUsers: User[] = [
@@ -59,6 +66,7 @@ export interface PublicUser {
 }
 
 async function readUsers(): Promise<User[]> {
+  const redis = getRedisClient()
   if (redis) {
     try {
       const users = await redis.get('users')
@@ -82,6 +90,7 @@ async function readUsers(): Promise<User[]> {
 }
 
 async function writeUsers(users: User[]): Promise<void> {
+  const redis = getRedisClient()
   if (redis) {
     try {
       await redis.set('users', JSON.stringify(users))
