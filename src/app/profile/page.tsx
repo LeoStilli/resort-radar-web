@@ -69,7 +69,7 @@ export default async function ProfilePage() {
     .join("")
     .toUpperCase();
 
-  const userReviews = getUserReviews(session.userId);
+  const userReviews = await getUserReviews(session.userId);
   const allResorts = await fetchAllResortWeather()
   const likedResorts = allResorts.filter((r) => (user.likedResorts ?? []).includes(r.id))
 

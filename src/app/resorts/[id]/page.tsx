@@ -46,7 +46,7 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
   const token = jar.get("session")?.value;
   const session = token ? verifySessionToken(token) : null;
 
-  const reviews = getResortReviews(id);
+  const reviews = await getResortReviews(id);
   const likeCount = await getResortLikeCount(id);
 
   let initialLiked = false;
@@ -56,7 +56,7 @@ export default async function ResortPage({ params }: { params: Promise<{ id: str
   if (session) {
     const user = await findUserById(session.userId);
     initialLiked = user?.likedResorts?.includes(id) ?? false;
-    userHasReviewed = hasUserReviewed(id, session.userId);
+    userHasReviewed = await hasUserReviewed(id, session.userId);
     userPasses = user?.skiPasses ?? [];
   }
 

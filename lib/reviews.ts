@@ -1,43 +1,86 @@
-import fs from "node:fs";
-import path from "node:path";
+import { Redis } from '@upstash/redis'
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const REVIEWS_FILE = path.join(DATA_DIR, "reviews.json");
+// Redis client setup with fallback for local development
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN
+    })
+  : null
+
+// In-memory fallback for local development
+let memoryReviews: Review[] = [
+  {
+    id: '4e7c9e80-9eeb-423f-9d55-c5f6ad41a13f',
+    resortId: 'jackson-hole',
+    userId: '27f381cd-7fc4-44e5-8cb2-85f808ce9741',
+    userName: 'Leo Stilli',
+    rating: 5,
+    text: 'love this place',
+    createdAt: '2026-04-24T06:14:40.329Z'
+  }
+]
 
 export interface Review {
-  id: string;
-  resortId: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  text: string;
-  createdAt: string;
+  id: string
+  resortId: string
+  userId: string
+  userName: string
+  rating: number
+  text: string
+  createdAt: string
 }
 
-function readReviews(): Review[] {
-  if (!fs.existsSync(REVIEWS_FILE)) return [];
-  return JSON.parse(fs.readFileSync(REVIEWS_FILE, "utf-8")) as Review[];
+async function readReviews(): Promise<Review[]> {
+  if (redis) {
+    try {
+      const reviews = await redis.get('reviews')
+      if (!reviews) return []
+
+      // Handle both JSON string and already-parsed object from Redis
+      if (typeof reviews === 'string') {
+        return JSON.parse(reviews)
+      } else if (Array.isArray(reviews)) {
+        return reviews as Review[]
+      } else {
+        console.warn('Unexpected Redis reviews data format:', typeof reviews)
+        return []
+      }
+    } catch (error) {
+      console.error('Redis reviews error:', error)
+      return []
+    }
+  }
+  return memoryReviews
 }
 
-function writeReviews(reviews: Review[]): void {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(reviews, null, 2));
+async function writeReviews(reviews: Review[]): Promise<void> {
+  if (redis) {
+    try {
+      await redis.set('reviews', JSON.stringify(reviews))
+    } catch (error) {
+      console.error('Redis reviews write error:', error)
+    }
+  } else {
+    memoryReviews = reviews
+  }
 }
 
-export function getResortReviews(resortId: string): Review[] {
-  return readReviews()
+export async function getResortReviews(resortId: string): Promise<Review[]> {
+  const reviews = await readReviews()
+  return reviews
     .filter((r) => r.resortId === resortId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 }
 
-export function addReview(
+export async function addReview(
   resortId: string,
   userId: string,
   userName: string,
   rating: number,
   text: string
-): Review {
-  const reviews = readReviews();
+): Promise<Review> {
+  const reviews = await readReviews()
   const review: Review = {
     id: crypto.randomUUID(),
     resortId,
@@ -45,19 +88,21 @@ export function addReview(
     userName,
     rating,
     text,
-    createdAt: new Date().toISOString(),
-  };
-  reviews.push(review);
-  writeReviews(reviews);
-  return review;
+    createdAt: new Date().toISOString()
+  }
+  reviews.push(review)
+  await writeReviews(reviews)
+  return review
 }
 
-export function hasUserReviewed(resortId: string, userId: string): boolean {
-  return readReviews().some((r) => r.resortId === resortId && r.userId === userId);
+export async function hasUserReviewed(resortId: string, userId: string): Promise<boolean> {
+  const reviews = await readReviews()
+  return reviews.some((r) => r.resortId === resortId && r.userId === userId)
 }
 
-export function getUserReviews(userId: string): Review[] {
-  return readReviews()
+export async function getUserReviews(userId: string): Promise<Review[]> {
+  const reviews = await readReviews()
+  return reviews
     .filter((r) => r.userId === userId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 }

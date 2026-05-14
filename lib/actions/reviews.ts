@@ -28,7 +28,7 @@ export async function submitReview(
   if (!text) return { error: "Please write something before submitting." };
   if (isNaN(rating) || rating < 1 || rating > 5) return { error: "Please select a star rating." };
 
-  addReview(resortId, session.userId, user.name, rating, text);
+  await addReview(resortId, session.userId, user.name, rating, text);
   revalidatePath(`/resorts/${resortId}`);
   return { success: true };
 }
