@@ -6,10 +6,17 @@ import { hashPassword } from './auth'
 const getRedisClient = () => {
   if (typeof window !== 'undefined') return null // Client-side
   if (process.env.NODE_ENV === 'development' || process.env.VERCEL_ENV) {
-    if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      return new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN
+    const url = process.env.UPSTASH_REDIS_REST_URL?.trim()
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim()
+
+    if (url && token && url.startsWith('https://')) {
+      console.log('Creating Redis client with URL:', url.substring(0, 20) + '...')
+      return new Redis({ url, token })
+    } else {
+      console.warn('Redis credentials missing or invalid:', {
+        hasUrl: !!url,
+        hasToken: !!token,
+        urlStart: url?.substring(0, 10)
       })
     }
   }
