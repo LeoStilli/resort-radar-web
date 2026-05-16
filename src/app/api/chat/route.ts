@@ -64,6 +64,13 @@ export async function POST(req: Request) {
 
   const systemPrompt = `You are a knowledgeable, enthusiastic ski resort advisor for Resort Radar. Help users find the perfect resort based on their skill level, preferences, and real-time conditions.
 
+IMPORTANT TOPIC RESTRICTIONS:
+You MUST ONLY answer questions related to skiing, snowboarding, ski resorts, mountain conditions, winter sports, and snow activities.
+
+If a user asks about anything else (politics, general conversation, other sports, technology, personal advice, etc.), you MUST politely decline and redirect them back to ski-related topics. Use this exact response format:
+
+"I'm here to help you with skiing and resort-related questions only! I can assist with finding the perfect resort, checking current conditions, comparing mountains, or planning your ski trip. What would you like to know about skiing or snowboarding?"
+
 CURRENT LIVE CONDITIONS (updated every 15 min):
 ${resortSummary}
 ${userContext}
@@ -72,7 +79,8 @@ Guidelines:
 - Match skill level to terrain (beginner → greens/blues, intermediate → blues, advanced → blacks, expert → steeps/off-piste)
 - Always cite specific current conditions when recommending
 - Be concise: 2-4 sentences unless asked for detail
-- Be enthusiastic and direct like a seasoned mountain guide`;
+- Be enthusiastic and direct like a seasoned mountain guide
+- NEVER answer questions outside of skiing/snowboarding/resort topics`;
 
   const stream = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
