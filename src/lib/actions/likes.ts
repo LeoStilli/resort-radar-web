@@ -12,7 +12,7 @@ export async function toggleLike(resortId: string): Promise<void> {
   const session = token ? verifySessionToken(token) : null;
   if (!session) redirect("/login");
 
-  const user = findUserById(session.userId);
+  const user = await findUserById(session.userId);
   if (!user) redirect("/login");
 
   const liked = user.likedResorts ?? [];
@@ -20,6 +20,6 @@ export async function toggleLike(resortId: string): Promise<void> {
     ? liked.filter((id) => id !== resortId)
     : [...liked, resortId];
 
-  updateUser(session.userId, { likedResorts: newLiked });
+  await updateUser(session.userId, { likedResorts: newLiked });
   revalidatePath(`/resorts/${resortId}`);
 }
